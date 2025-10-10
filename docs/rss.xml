@@ -1,5 +1,24 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frestlake</title><link>https://doulifv.github.io/blog</link><description>这是一个个人博客！！没事瞎写着玩</description><copyright>Frestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 10 Oct 2025 12:29:45 +0000</lastBuildDate><managingEditor>Frestlake</managingEditor><ttl>60</ttl><webMaster>Frestlake</webMaster><item><title>Wireguard</title><link>https://doulifv.github.io/blog/post/Wireguard.html</link><description>#一，安装需要的依赖
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frestlake</title><link>https://doulifv.github.io/blog</link><description>这是一个个人博客！！没事瞎写着玩</description><copyright>Frestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 10 Oct 2025 12:31:51 +0000</lastBuildDate><managingEditor>Frestlake</managingEditor><ttl>60</ttl><webMaster>Frestlake</webMaster><item><title>windows 配置端口转发</title><link>https://doulifv.github.io/blog/post/windows%20-pei-zhi-duan-kou-zhuan-fa.html</link><description>#####以Windows7为例
+#####显示当前正在使用的端口转发规则
+```
+netsh interface portproxy show all
+```
+#####添加端口转发
+```
+netsh interface portproxy add v4tov4 listenaddress=192.168.1.214 listenport=45622 connectaddress=192.168.6.128 connectport=45622
+
+#源主机192.168.1.214:45622 转发到 192.168.6.128:45622
+```
+#####删除转发规则
+```
+netsh interface portproxy delete v4tov4 listenaddress=192.168.1.214 listenport=45622 
+```
+---
+![image.png](https://upload-images.jianshu.io/upload_images/27021437-58e517f1e8f128c1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+[netsh windows7 自带端口映射（转发）使用教程-CSDN](https://blog.csdn.net/u010953692/article/details/77045211)
+[windows命令行下用netsh实现端口转发(端口映射)-CSDN](https://blog.csdn.net/dogquill/article/details/50143925)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/windows%20-pei-zhi-duan-kou-zhuan-fa.html</guid><pubDate>Fri, 10 Oct 2025 12:31:21 +0000</pubDate></item><item><title>Wireguard</title><link>https://doulifv.github.io/blog/post/Wireguard.html</link><description>#一，安装需要的依赖
 ```
 apt install wireguard
 ```

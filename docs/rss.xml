@@ -1,5 +1,24 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frestlake</title><link>https://doulifv.github.io/blog</link><description>这是一个个人博客！！没事瞎写着玩</description><copyright>Frestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 10 Oct 2025 12:31:51 +0000</lastBuildDate><managingEditor>Frestlake</managingEditor><ttl>60</ttl><webMaster>Frestlake</webMaster><item><title>windows 配置端口转发</title><link>https://doulifv.github.io/blog/post/windows%20-pei-zhi-duan-kou-zhuan-fa.html</link><description>#####以Windows7为例
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frestlake</title><link>https://doulifv.github.io/blog</link><description>这是一个个人博客！！没事瞎写着玩</description><copyright>Frestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 10 Oct 2025 12:33:54 +0000</lastBuildDate><managingEditor>Frestlake</managingEditor><ttl>60</ttl><webMaster>Frestlake</webMaster><item><title>通过导出Windows注册表文件备份共享目录和权限</title><link>https://doulifv.github.io/blog/post/tong-guo-dao-chu-Windows-zhu-ce-biao-wen-jian-bei-fen-gong-xiang-mu-lu-he-quan-xian.html</link><description>export(admin).bat
+```
+@echo off
+set rf=.\shareConfig.reg
+
+reg export HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\lanmanserver\Shares %rf%
+pause
+```
+import(admin).bat
+```
+@echo off
+set rf=.\shareConfig.reg
+
+reg import %rf%
+net stop server
+net start server
+net share
+pause
+```
+。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/tong-guo-dao-chu-Windows-zhu-ce-biao-wen-jian-bei-fen-gong-xiang-mu-lu-he-quan-xian.html</guid><pubDate>Fri, 10 Oct 2025 12:33:27 +0000</pubDate></item><item><title>windows 配置端口转发</title><link>https://doulifv.github.io/blog/post/windows%20-pei-zhi-duan-kou-zhuan-fa.html</link><description>#####以Windows7为例
 #####显示当前正在使用的端口转发规则
 ```
 netsh interface portproxy show all

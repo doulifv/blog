@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frestlake</title><link>https://doulifv.github.io/blog</link><description>这是一个个人博客！！没事瞎写着玩</description><copyright>Frestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 10 Oct 2025 12:40:46 +0000</lastBuildDate><managingEditor>Frestlake</managingEditor><ttl>60</ttl><webMaster>Frestlake</webMaster><item><title>自用的VPS商家列表</title><link>https://doulifv.github.io/blog/post/zi-yong-de-VPS-shang-jia-lie-biao.html</link><description>[racknerd](https://racknerd.com/)
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Frestlake</title><link>https://doulifv.github.io/blog</link><description>这是一个个人博客！！没事瞎写着玩</description><copyright>Frestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 11 Oct 2025 01:13:21 +0000</lastBuildDate><managingEditor>Frestlake</managingEditor><ttl>60</ttl><webMaster>Frestlake</webMaster><item><title>VMware Tool</title><link>https://doulifv.github.io/blog/post/VMware%20Tool.html</link><description>
+
+vmwaretools download link
+https://packages.vmware.com/tools/releases/
+blog link
+title: 虚拟机安装VMware Tools时提示缺少KB2919355补丁
+https://www.dinghui.org/vmware-tools-microsoft-kb2919355.html
+
+查询VMware kb55798，是由于安装VMware Tools 10.3.x以上版本时，会检测环境是否具备Microsoft Visual C++ 2017 Redistributable先决条件。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/VMware%20Tool.html</guid><pubDate>Sat, 11 Oct 2025 01:12:50 +0000</pubDate></item><item><title>自用的VPS商家列表</title><link>https://doulifv.github.io/blog/post/zi-yong-de-VPS-shang-jia-lie-biao.html</link><description>[racknerd](https://racknerd.com/)
 [massivegrid](https://www.massivegrid.com/)
 [avenacloud](https://avenacloud.com/)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/zi-yong-de-VPS-shang-jia-lie-biao.html</guid><pubDate>Fri, 10 Oct 2025 12:40:11 +0000</pubDate></item><item><title>通过导出Windows注册表文件备份共享目录和权限</title><link>https://doulifv.github.io/blog/post/tong-guo-dao-chu-Windows-zhu-ce-biao-wen-jian-bei-fen-gong-xiang-mu-lu-he-quan-xian.html</link><description>export(admin).bat
 ```

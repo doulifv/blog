@@ -2,6 +2,6 @@
     "title":"Forestlake",
     "subTitle":"一个业余玩家，没事就喜欢玩一些网络技术。",
     "avatarUrl":"https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg",
-    "allHead":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script>",
+    "allHead":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>",
     "GMEEK_VERSION":"last"
 }

@@ -1,5 +1,289 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 11 Oct 2025 02:12:49 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>RustDesk自托管</title><link>https://doulifv.github.io/blog/post/RustDesk-zi-tuo-guan.html</link><description>[https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/install/](https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/install/)
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 11 Oct 2025 05:56:54 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>Debian apt更新https源缺少公钥问题</title><link>https://doulifv.github.io/blog/post/Debian%20apt-geng-xin-https-yuan-que-shao-gong-yao-wen-ti.html</link><description>
+&gt;root@debian:~# apt update
+Get:1 http://repo.mysql.com/apt/debian buster InRelease [22.1 kB]     
+Hit:2 http://mirrors4.tuna.tsinghua.edu.cn/debian buster InRelease    
+Hit:3 http://mirrors4.tuna.tsinghua.edu.cn/debian buster-updates InRelease
+Get:4 http://mirrors4.tuna.tsinghua.edu.cn/debian buster-backports InRelease [51.4 kB]
+Err:1 http://repo.mysql.com/apt/debian buster InRelease
+  The following signatures couldn't be verified because the public key is not available: NO_PUBKEY **467B942D3A79BD29**
+Get:5 http://mirrors4.tuna.tsinghua.edu.cn/debian-security buster/updates InRelease [34.8 kB]
+Reading package lists... Done      
+W: GPG error: http://repo.mysql.com/apt/debian buster InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 467B942D3A79BD29
+E: The repository 'http://repo.mysql.com/apt/debian buster InRelease' is not signed.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+
+添加
+```
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+```
+&gt;root@debian:~# apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+Executing: /tmp/apt-key-gpghome.BKquJCirKG/gpg.1.sh --keyserver hkp://keyserver.ubuntu.com:80 --recv 467B942D3A79BD29
+gpg: key 467B942D3A79BD29: public key 'MySQL Release Engineering &lt;mysql-build@oss.oracle.com&gt;' imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+
+此时再更新就没有问题了
+
+参考:[#解决 由于没有公钥，无法验证下列签名 :NO_PUBKEY-博客园](https://www.cnblogs.com/2205254761qq/p/11863928.html)
+。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian%20apt-geng-xin-https-yuan-que-shao-gong-yao-wen-ti.html</guid><pubDate>Sat, 11 Oct 2025 05:54:39 +0000</pubDate></item><item><title>解决Debian键盘错乱问题</title><link>https://doulifv.github.io/blog/post/jie-jue-Debian-jian-pan-cuo-luan-wen-ti.html</link><description>1.编辑vimrc.tiny 文件
+```
+vi /etc/vim/vimrc.tiny 
+```
+2.修改、增加以下两行内容
+```
+set nocompatible #修改
+set backspace=2 #增加
+```
+3.保存退出即可
+
+[vim 方向键和backspace乱码-CSDN](https://blog.csdn.net/qq_36340642/article/details/109806721)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/jie-jue-Debian-jian-pan-cuo-luan-wen-ti.html</guid><pubDate>Sat, 11 Oct 2025 05:54:09 +0000</pubDate></item><item><title>手动使用Acme.sh证书脚本申请SSL证书</title><link>https://doulifv.github.io/blog/post/shou-dong-shi-yong-Acme.sh-zheng-shu-jiao-ben-shen-qing-SSL-zheng-shu.html</link><description>
+#准备材料
+一台VPS
+一枚域名
+CloudFlare账号（如使用CF API）
+
+#部署步骤
+###安装Acme.sh证书申请脚本
+1.运行以下命令，安装Acme.sh证书申请脚本
+```
+curl https://get.acme.sh | sh -s email=my@example.com
+```
+&gt;由于Acme.sh脚本调用了GitHub的资源，且GitHub不支持纯IPv6的环境，所以请自行设置DNS64或安装WARP解决
+建议替换[my@example.com](mailto:my@example.com)为自己的邮箱
+2.切换默认证书签发的CA机构为下面三家的任何一家
+
+Let’s Encrypt （签发速度快、稳定）
+```
+bash ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+```
+ZeroSSL （稳定、但部分情况无法签发）
+```
+bash ~/.acme.sh/acme.sh --set-default-ca --server zerossl
+```
+Buypass（没试过）
+```
+bash ~/.acme.sh/acme.sh --set-default-ca --server buypass
+```
+3.设置Acme.sh自动更新，始终与官方保持一致
+```
+bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+```
+###使用Standalone模式申请SSL证书
+此方法使用之前请确保80端口畅通，并且域名已经事先解析到VPS的IP
+域名解析至IPv4：
+```
+bash ~/.acme.sh/acme.sh --issue -d '域名' --standalone -k ec-256
+```
+域名已解析至IPv6：
+```
+bash ~/.acme.sh/acme.sh --issue -d '域名' --standalone -k ec-256 --listen-v6
+```
+###使用CloudFlare API Key申请SSL证书
+此方法可以使用泛域名、无需DNS解析，但由于受到CF API限制，不可适用于Freenom系列的免费域名
+1.设置CloudFlare Global API Key和登录邮箱
+```
+export CF_Key='你自己的CloudFlare Global API Key'
+export CF_Email='你自己的CloudFlare账户登录邮箱'
+```
+2.运行一下命令
+####单域名
+IPv4 或原生双栈VPS
+```
+bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d '域名' -k ec-256
+```
+IPv6
+```
+bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d '域名' -k ec-256 --listen-v6
+```
+####泛域名
+IPv4 或原生双栈VPS
+```
+bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d '*.域名' -d '域名' -k ec-256
+```
+IPv6
+```
+bash ~/.acme.sh/acme.sh --issue --dns dns_cf -d '*.域名' -d '域名' -k ec-256 --listen-v6
+```
+####安装域名证书
+由于acme.sh的证书不能直接使用，因此我们需要安装证书
+单域名
+```
+bash ~/.acme.sh/acme.sh --install-cert -d '域名' --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+```
+泛域名
+```
+bash ~/.acme.sh/acme.sh --install-cert -d '*.域名' --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+```
+&gt;运行此命令后，证书crt路径为/root/cert.crt，私钥key路径为/root/private.key，可自行修改
+
+####查看目前申请的证书
+```
+bash ~/.acme.sh/acme.sh --list
+```
+####撤销目前申请的证书
+```
+bash ~/.acme.sh/acme.sh --revoke -d '域名' --ecc
+bash ~/.acme.sh/acme.sh --remove -d '域名' --ecc
+```
+####手动续期证书
+```
+bash ~/.acme.sh/acme.sh --renew -d '域名' --force --ecc
+```
+####卸载Acme.sh脚本
+```
+bash ~/.acme.sh/acme.sh --uninstall
+```
+[[DELETE]手动使用Acme.sh证书脚本申请SSL证书 | MisakaNo の 小破站](https://blog.misaka.rest/2023/04/02/acme-ssl-cert/?highlight=acme)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/shou-dong-shi-yong-Acme.sh-zheng-shu-jiao-ben-shen-qing-SSL-zheng-shu.html</guid><pubDate>Sat, 11 Oct 2025 05:53:37 +0000</pubDate></item><item><title>Debian 系统安装 MySQL</title><link>https://doulifv.github.io/blog/post/Debian%20-xi-tong-an-zhuang-%20MySQL.html</link><description>首先安装需要用到的依赖
+```
+apt install wget gnupg lsb-release -y
+```
+使用wget获取deb包、安装  | 需要其他版本可前往[MySQL官网下载](https://dev.mysql.com/downloads/)
+```
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.28-1_all.deb
+dpkg -i mysql-apt-config_0.8.28-1_all.deb 
+```
+![选择OK即可](https://upload-images.jianshu.io/upload_images/27021437-9f963c9264a73d55.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+更新软件包、安装mysql-server
+```
+apt update
+apt install mysql-server
+```
+![设置一个可靠的密码](https://upload-images.jianshu.io/upload_images/27021437-2cd8bc2131ef6f72.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+至此MySQL服务已经部署完毕。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian%20-xi-tong-an-zhuang-%20MySQL.html</guid><pubDate>Sat, 11 Oct 2025 05:53:05 +0000</pubDate></item><item><title>Debian 12 更改apt源</title><link>https://doulifv.github.io/blog/post/Debian%2012%20-geng-gai-apt-yuan.html</link><description>更新源命令
+```
+apt-get update 
+apt-get upgrade 
+```
+[可参考清华大学镜像站教程](https://mirrors.tuna.tsinghua.edu.cn/help/debian/#:~:text=%E4%B8%80%E8%88%AC%E6%83%85%E5%86%B5%E4%B8%8B%EF%BC%8C%E5%B0%86%20%2Fetc%2Fapt%2Fsources.list%20%E6%96%87%E4%BB%B6%E4%B8%AD,Debian%20%E9%BB%98%E8%AE%A4%E7%9A%84%E6%BA%90%E5%9C%B0%E5%9D%80%20http%3A%2F%2Fdeb.debian.org%2F%20%E6%9B%BF%E6%8D%A2%E4%B8%BA%E9%95%9C%E5%83%8F%E5%9C%B0%E5%9D%80%E5%8D%B3%E5%8F%AF%E3%80%82)
+Debian Buster 以上版本默认支持 HTTPS 源。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian%2012%20-geng-gai-apt-yuan.html</guid><pubDate>Sat, 11 Oct 2025 05:52:07 +0000</pubDate></item><item><title>Debian下通过Wondershaper限制网速</title><link>https://doulifv.github.io/blog/post/Debian-xia-tong-guo-Wondershaper-xian-zhi-wang-su.html</link><description>安装git和make
+```
+apt install make git -y 
+```
+使用git拉取代码 、进入文件夹、使用make安装
+```
+git clone https://github.com/magnific0/wondershaper.git
+cd wondershaper
+make install
+```
+通过以下命令可以查看相关运行参数
+```
+wondershaper -h 
+```
+&gt;   -a 指定网络适配器
+   -d 设置最大下载速率(单位为kbps)
+   -u 设置最大上传速率(单位:kbps)
+   -p 使用'/etc/systemd/wondershaper.conf'中的预设值
+   -f 使用指定的预设文件
+   -c 清除适配器的限制
+   -s 显示适配器的当前状态
+
+例如:限制网卡ens33的上传和下载为8000kbps每秒(8kbit/s=1kByte)
+```
+wondershaper -a ens33 -u 8000 -d 8000
+```
+设置完可以安装speedtest-cli测试一下限速效果
+```
+apt install speedtest-cli
+speedtest #测试网速
+```
+卸载
+```
+make uninstall #卸载
+reboot #重启
+```
+。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian-xia-tong-guo-Wondershaper-xian-zhi-wang-su.html</guid><pubDate>Sat, 11 Oct 2025 05:51:17 +0000</pubDate></item><item><title>Debian网络配置以及开启root远程登录</title><link>https://doulifv.github.io/blog/post/Debian-wang-luo-pei-zhi-yi-ji-kai-qi-root-yuan-cheng-deng-lu.html</link><description>查看需要配置的网卡名
+```
+ip address
+```
+编辑网卡配置文件/etc/network/interfaces
+```
+vi /etc/network/interfaces
+```
+添加以下字段为ens33这张网卡添加192.168.1.2这IP地址
+```
+auto ens33
+iface ens33 inet static
+address 192.168.1.2/24 #主机地址/掩码
+gateway 192.168.1.1 #网关
+```
+添加DNS服务器地址
+```
+echo &gt;&gt; /etc/resolv.conf  nameserver 8.8.8.8
+echo &gt;&gt; /etc/resolv.conf  nameserver 1.1.1.1
+```
+重启网卡、查看网卡IP配置情况
+```
+/etc/init.d/networking restart
+ip address
+```
+允许root用户远程登录、重启ssh服务
+```
+echo PermitRootLogin yes &gt;&gt; /etc/ssh/sshd_config  
+/etc/init.d/ssh restart
+```。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian-wang-luo-pei-zhi-yi-ji-kai-qi-root-yuan-cheng-deng-lu.html</guid><pubDate>Sat, 11 Oct 2025 05:50:48 +0000</pubDate></item><item><title>Debian开启BBR加速</title><link>https://doulifv.github.io/blog/post/Debian-kai-qi-BBR-jia-su.html</link><description>Debian10-12默认编译了BBR拥塞控制算法可直接开启
+命令如下
+```
+echo net.core.default_qdisc=fq &gt;&gt; /etc/sysctl.conf
+echo net.ipv4.tcp_congestion_control=bbr &gt;&gt; /etc/sysctl.conf
+sysctl -p
+```
+检查是否配置成功
+```
+sysctl net.ipv4.tcp_available_congestion_control
+```
+回显如下信息则表示成功开启BBR加速
+&gt;net.ipv4.tcp_available_congestion_control = reno cubic bbr
+。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian-kai-qi-BBR-jia-su.html</guid><pubDate>Sat, 11 Oct 2025 05:50:18 +0000</pubDate></item><item><title>Debian配置Fail2ban防止SSH账号密码被暴力破解</title><link>https://doulifv.github.io/blog/post/Debian-pei-zhi-Fail2ban-fang-zhi-SSH-zhang-hao-mi-ma-bei-bao-li-po-jie.html</link><description>安装fail2ban服务
+```
+apt install fail2ban
+```
+启动、设置开机自启动、查看状态
+```
+systemctl start fail2ban
+systemctl enable fail2ban
+systemctl status fail2ban
+``` 
+配置
+[ ! ] 这里不建议直接修改/etc/fail2ban/jail.conf文件里面的参数
+可以创建/etc/fail2ban/jail.local文件它会默认覆盖掉jail.conf文件里面的参数
+``` 
+vim /etc/fail2ban/jail.local
+``` 
+设置以下参数
+```
+[sshd]               
+enabled = true       
+port = 22 #默认端口号如不是请修改           
+filter = sshd      
+logpath = /var/log/fail2ban.log  #日志
+maxretry = 3        #最大尝试次数
+findtime = 8467200 #
+bantime = 8467200 # 解用时间
+backend = systemd
+ignoreip = 127.0.0.1/8 192.168.0.1/16  #白名单网段/地址
+```
+重新启动Fail2ban服务
+```
+systemctl restart fail2ban
+```
+查看fail2ban ssh进程的禁用列表
+ ```
+fail2ban-client status sshd
+```
+解禁ban列表内IP
+```
+fail2ban-client set sshd unbanip [IP address]
+```
+&gt;例如：fail2ban-client set sshd unbanip 8.245.78.2
+表示解禁8.245.78.2这个IP地址
+
+卸载服务
+```
+systemctl stop fail2ban 
+apt purge fail2ban
+```。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Debian-pei-zhi-Fail2ban-fang-zhi-SSH-zhang-hao-mi-ma-bei-bao-li-po-jie.html</guid><pubDate>Sat, 11 Oct 2025 05:49:44 +0000</pubDate></item><item><title>RustDesk自托管</title><link>https://doulifv.github.io/blog/post/RustDesk-zi-tuo-guan.html</link><description>[https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/install/](https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/install/)
 [https://www.cnblogs.com/ryanyangcs/p/18186163](https://www.cnblogs.com/ryanyangcs/p/18186163)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/RustDesk-zi-tuo-guan.html</guid><pubDate>Sat, 11 Oct 2025 02:11:18 +0000</pubDate></item><item><title>vmware linux挂载共享文件夹</title><link>https://doulifv.github.io/blog/post/vmware%20linux-gua-zai-gong-xiang-wen-jian-jia.html</link><description>安装依赖
 ```
 apt install open-vm-tools open-vm-tools-desktop

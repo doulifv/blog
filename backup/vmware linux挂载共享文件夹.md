@@ -1,3 +1,4 @@
+安装依赖
 ```
 apt install open-vm-tools open-vm-tools-desktop
 ```

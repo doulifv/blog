@@ -1,5 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sun, 12 Oct 2025 12:44:12 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>Stardew Valley 星露谷mod备份</title><link>https://doulifv.github.io/blog/post/Stardew%20Valley%20-xing-lu-gu-mod-bei-fen.html</link><description>## 万一换电脑别给我整没了提前记录备份
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sun, 12 Oct 2025 13:10:42 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>解决Steam Deck首次开机卡更新情况</title><link>https://doulifv.github.io/blog/post/jie-jue-Steam%20Deck-shou-ci-kai-ji-qia-geng-xin-qing-kuang.html</link><description>实测挂代理没有什么用处，网上搜索了一通找到这个方法更新成功
+
+详细讲解操作办法：
+
+1.如果你已经进入图形界面的更新过程，那么请你现在长按电源键，重启你的deck
+
+2.正常设置语言，没有限制一定要英文，选你喜欢的语言和时区，美国时间、日本时间、中国时间、韩国时间；中日英韩语，甚至是其他你看得懂的语言都OK，选好后进入下一步，设置网络
+
+3.（请将第4步的所有文字看完再操作！）
+
+4.设置网络的时候，不要急着下一步！设置好网络之后，屏幕状态栏右上角显示Wi-Fi或有线网络的图标。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/jie-jue-Steam%20Deck-shou-ci-kai-ji-qia-geng-xin-qing-kuang.html</guid><pubDate>Sun, 12 Oct 2025 13:10:18 +0000</pubDate></item><item><title>Stardew Valley 星露谷mod备份</title><link>https://doulifv.github.io/blog/post/Stardew%20Valley%20-xing-lu-gu-mod-bei-fen.html</link><description>## 万一换电脑别给我整没了提前记录备份
  &lt;div align='center'&gt;&lt;img src='https://smapi.io/Content/images/pufferchick.svg'&gt;&lt;/div&gt;
 
 #### [SMAPI:万物之源，没有这个你啥也干不了](https://smapi.io/)  

@@ -1,4 +1,4 @@
-## Stardew Valley 星露谷mod备份万一换电脑别给我整没了提前记录备份
+## 万一换电脑别给我整没了提前记录备份
  <div align='center'><img src="https://smapi.io/Content/images/pufferchick.svg"></div>
 
 #### [SMAPI:万物之源，没有这个你啥也干不了](https://smapi.io/)  

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sun, 12 Oct 2025 13:10:42 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>解决Steam Deck首次开机卡更新情况</title><link>https://doulifv.github.io/blog/post/jie-jue-Steam%20Deck-shou-ci-kai-ji-qia-geng-xin-qing-kuang.html</link><description>实测挂代理没有什么用处，网上搜索了一通找到这个方法更新成功
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Thu, 16 Oct 2025 15:29:20 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>解决Steam Deck首次开机卡更新情况</title><link>https://doulifv.github.io/blog/post/jie-jue-Steam%20Deck-shou-ci-kai-ji-qia-geng-xin-qing-kuang.html</link><description>实测挂代理没有什么用处，网上搜索了一通找到这个方法更新成功
 
 详细讲解操作办法：
 
@@ -370,7 +370,8 @@ netsh interface portproxy delete v4tov4 listenaddress=192.168.1.214 listenport=4
 ![image.png](https://upload-images.jianshu.io/upload_images/27021437-58e517f1e8f128c1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 [netsh windows7 自带端口映射（转发）使用教程-CSDN](https://blog.csdn.net/u010953692/article/details/77045211)
-[windows命令行下用netsh实现端口转发(端口映射)-CSDN](https://blog.csdn.net/dogquill/article/details/50143925)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/windows%20-pei-zhi-duan-kou-zhuan-fa.html</guid><pubDate>Fri, 10 Oct 2025 12:31:21 +0000</pubDate></item><item><title>Wireguard</title><link>https://doulifv.github.io/blog/post/Wireguard.html</link><description>#一，安装需要的依赖
+[windows命令行下用netsh实现端口转发(端口映射)-CSDN](https://blog.csdn.net/dogquill/article/details/50143925)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/windows%20-pei-zhi-duan-kou-zhuan-fa.html</guid><pubDate>Fri, 10 Oct 2025 12:31:21 +0000</pubDate></item><item><title>Wireguard</title><link>https://doulifv.github.io/blog/post/Wireguard.html</link><description>### 一、安装 
+安装需要的依赖
 ```
 apt install wireguard
 ```
@@ -409,7 +410,7 @@ AllowedIPs = 10.0.8.10/24 ' &gt; wg0.conf
 ```
 systemctl enable wg-quick@wg0
 ```
-#客户端配置文件生成
+客户端配置文件生成
 ```echo '
 [Interface]
   PrivateKey = $(cat client_privatekey)  # 填写本机的privatekey 内容
@@ -423,9 +424,9 @@ systemctl enable wg-quick@wg0
   AllowedIPs = 0.0.0.0/0, ::0/0
   PersistentKeepalive = 25 ' &gt; client.conf
 ```
-# 2.2.4 步骤四: 启动 | 停止
+### 服务的启动 | 停止
 
-## 2.2.4.1 服务端启动
+#### 服务端启动
 
 启动或停止**wireguard**服务端的命令如下：
  启动WireGuard
@@ -440,7 +441,7 @@ wg-quick down wg0
 ```
 wg
 ```
-##2.2.4.2 客户端启动
+#### 客户端启动
 启动或停止wireguard客户端的命令如下：
 启动WireGuard
 ```

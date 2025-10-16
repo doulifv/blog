@@ -1,4 +1,5 @@
-#一，安装需要的依赖
+### 一、安装 
+安装需要的依赖
 ```
 apt install wireguard
 ```
@@ -37,7 +38,7 @@ AllowedIPs = 10.0.8.10/24 " > wg0.conf
 ```
 systemctl enable wg-quick@wg0
 ```
-#客户端配置文件生成
+客户端配置文件生成
 ```echo "
 [Interface]
   PrivateKey = $(cat client_privatekey)  # 填写本机的privatekey 内容
@@ -51,9 +52,9 @@ systemctl enable wg-quick@wg0
   AllowedIPs = 0.0.0.0/0, ::0/0
   PersistentKeepalive = 25 " > client.conf
 ```
-# 2.2.4 步骤四: 启动 | 停止
+### 服务的启动 | 停止
 
-## 2.2.4.1 服务端启动
+#### 服务端启动
 
 启动或停止**wireguard**服务端的命令如下：
  启动WireGuard
@@ -68,7 +69,7 @@ wg-quick down wg0
 ```
 wg
 ```
-##2.2.4.2 客户端启动
+#### 客户端启动
 启动或停止wireguard客户端的命令如下：
 启动WireGuard
 ```

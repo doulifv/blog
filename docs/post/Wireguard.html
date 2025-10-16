@@ -10,7 +10,8 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="#一，安装需要的依赖
+<meta name="description" content="### 一、安装 
+安装需要的依赖
 ```
 apt install wireguard
 ```
@@ -49,7 +50,7 @@ AllowedIPs = 10.0.8.10/24 ' > wg0.conf
 ```
 systemctl enable wg-quick@wg0
 ```
-#客户端配置文件生成
+客户端配置文件生成
 ```echo '
 [Interface]
   PrivateKey = $(cat client_privatekey)  # 填写本机的privatekey 内容
@@ -63,9 +64,9 @@ systemctl enable wg-quick@wg0
   AllowedIPs = 0.0.0.0/0, ::0/0
   PersistentKeepalive = 25 ' > client.conf
 ```
-# 2.2.4 步骤四: 启动 | 停止
+### 服务的启动 | 停止
 
-## 2.2.4.1 服务端启动
+#### 服务端启动
 
 启动或停止**wireguard**服务端的命令如下：
  启动WireGuard
@@ -80,7 +81,7 @@ wg-quick down wg0
 ```
 wg
 ```
-##2.2.4.2 客户端启动
+#### 客户端启动
 启动或停止wireguard客户端的命令如下：
 启动WireGuard
 ```
@@ -111,7 +112,8 @@ apt install iptables
 
 。">
 <meta property="og:title" content="Wireguard">
-<meta property="og:description" content="#一，安装需要的依赖
+<meta property="og:description" content="### 一、安装 
+安装需要的依赖
 ```
 apt install wireguard
 ```
@@ -150,7 +152,7 @@ AllowedIPs = 10.0.8.10/24 ' > wg0.conf
 ```
 systemctl enable wg-quick@wg0
 ```
-#客户端配置文件生成
+客户端配置文件生成
 ```echo '
 [Interface]
   PrivateKey = $(cat client_privatekey)  # 填写本机的privatekey 内容
@@ -164,9 +166,9 @@ systemctl enable wg-quick@wg0
   AllowedIPs = 0.0.0.0/0, ::0/0
   PersistentKeepalive = 25 ' > client.conf
 ```
-# 2.2.4 步骤四: 启动 | 停止
+### 服务的启动 | 停止
 
-## 2.2.4.1 服务端启动
+#### 服务端启动
 
 启动或停止**wireguard**服务端的命令如下：
  启动WireGuard
@@ -181,7 +183,7 @@ wg-quick down wg0
 ```
 wg
 ```
-##2.2.4.2 客户端启动
+#### 客户端启动
 启动或停止wireguard客户端的命令如下：
 启动WireGuard
 ```
@@ -275,7 +277,8 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><p>#一，安装需要的依赖</p>
+<div class="markdown-body" id="postBody"><h3>一、安装</h3>
+<p>安装需要的依赖</p>
 <pre class="notranslate"><code class="notranslate">apt install wireguard
 </code></pre>
 <p>开启流量转发</p>
@@ -308,7 +311,7 @@ AllowedIPs = 10.0.8.10/24 " &gt; wg0.conf
 <p>还需要设置开机启动：</p>
 <pre class="notranslate"><code class="notranslate">systemctl enable wg-quick@wg0
 </code></pre>
-<p>#客户端配置文件生成</p>
+<p>客户端配置文件生成</p>
 <pre lang="echo" data-meta="&quot;" class="notranslate"><code class="notranslate">[Interface]
   PrivateKey = $(cat client_privatekey)  # 填写本机的privatekey 内容
   Address = 10.0.8.10/24
@@ -321,8 +324,8 @@ AllowedIPs = 10.0.8.10/24 " &gt; wg0.conf
   AllowedIPs = 0.0.0.0/0, ::0/0
   PersistentKeepalive = 25 " &gt; client.conf
 </code></pre>
-<h1>2.2.4 步骤四: 启动 | 停止</h1>
-<h2>2.2.4.1 服务端启动</h2>
+<h3>服务的启动 | 停止</h3>
+<h4>服务端启动</h4>
 <p>启动或停止<strong>wireguard</strong>服务端的命令如下：<br>
 启动WireGuard</p>
 <pre class="notranslate"><code class="notranslate">wg-quick up wg0
@@ -333,8 +336,8 @@ AllowedIPs = 10.0.8.10/24 " &gt; wg0.conf
 <p>查看wireguard服务端运行状态命令：</p>
 <pre class="notranslate"><code class="notranslate">wg
 </code></pre>
-<p>##2.2.4.2 客户端启动<br>
-启动或停止wireguard客户端的命令如下：<br>
+<h4>客户端启动</h4>
+<p>启动或停止wireguard客户端的命令如下：<br>
 启动WireGuard</p>
 <pre class="notranslate"><code class="notranslate">wg-quick up client
 </code></pre>

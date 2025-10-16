@@ -7,9 +7,9 @@
     "exlink":{"monitor":"https://tz.4566.link"},
     "startSite":"10/10/2025",
     "onePageListNum":"10",
-    "showPostSource":0,//设置为1则在文章页显示issue链接按钮，设置为0则不显示
-    "i18n":"CN",//博客语言
-    "UTC":8,//时区
+    "showPostSource":0,
+    "i18n":"CN",
+    "UTC":8,
     "allHead":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>",
     "GMEEK_VERSION":"last"
 }

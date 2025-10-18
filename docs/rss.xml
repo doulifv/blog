@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 18 Oct 2025 01:47:41 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>2053端口弱密码扫描</title><link>https://doulifv.github.io/blog/post/2053-duan-kou-ruo-mi-ma-sao-miao.html</link><description>```
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 18 Oct 2025 01:49:58 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>2053端口弱密码扫描</title><link>https://doulifv.github.io/blog/post/2053-duan-kou-ruo-mi-ma-sao-miao.html</link><description>```
 #!/bin/bash
 #echo 'IP range:'
 #read ip_range
@@ -20,7 +20,7 @@ for ip_ad in $(sed -nE 's/.*'ip': '([^']+)'.*/\1/p' scan.json); do
     fi
 done;
 ```
-依赖的包 curl、masscan 。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/2053-duan-kou-ruo-mi-ma-sao-miao.html</guid><pubDate>Sat, 18 Oct 2025 01:47:01 +0000</pubDate></item><item><title>解决Steam Deck首次开机卡更新情况</title><link>https://doulifv.github.io/blog/post/jie-jue-Steam%20Deck-shou-ci-kai-ji-qia-geng-xin-qing-kuang.html</link><description>实测挂代理没有什么用处，网上搜索了一通找到这个方法更新成功
+依赖的包curl、masscan配合使用nohup后台运行。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/2053-duan-kou-ruo-mi-ma-sao-miao.html</guid><pubDate>Sat, 18 Oct 2025 01:47:01 +0000</pubDate></item><item><title>解决Steam Deck首次开机卡更新情况</title><link>https://doulifv.github.io/blog/post/jie-jue-Steam%20Deck-shou-ci-kai-ji-qia-geng-xin-qing-kuang.html</link><description>实测挂代理没有什么用处，网上搜索了一通找到这个方法更新成功
 
 详细讲解操作办法：
 

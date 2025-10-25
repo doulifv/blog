@@ -1,4 +1,4 @@
-实测适用于WINDOWS 11 10 9 8 7 
+实测适用于WINDOWS 11 10 8 7 
 **在PowerShell中输入以安装**
 ```
 irm https://get.activated.win | iex

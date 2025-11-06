@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    <script src='https://blog.meekdai.com/Gmeek/plugins/GmeekVercount.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+    <link rel="icon" href="https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="```
+#!/bin/bash
+
+export LANG=en_US.UTF-8
+
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+PLAIN='\033[0m'
+
+red(){
+    echo -e '\033[31m\033[01m$1\033[0m'
+}
+
+green(){
+    echo -e '\033[32m\033[01m$1\033[0m'
+}
+
+yellow(){
+    echo -e '\033[33m\033[01m$1\033[0m'
+}
+
+# 判断系统及定义系统安装依赖方式
+REGEX=('debian' 'ubuntu' 'centos|red hat|kernel|oracle linux|alma|rocky' ''amazon linux'' 'fedora')
+RELEASE=('Debian' 'Ubuntu' 'CentOS' 'CentOS' 'Fedora')
+PACKAGE_UPDATE=('apt-get update' 'apt-get update' 'yum -y update' 'yum -y update' 'yum -y update')
+PACKAGE_INSTALL=('apt -y install' 'apt -y install' 'yum -y install' 'yum -y install' 'yum -y install')
+PACKAGE_REMOVE=('apt -y remove' 'apt -y remove' 'yum -y remove' 'yum -y remove' 'yum -y remove')
+PACKAGE_UNINSTALL=('apt -y autoremove' 'apt -y autoremove' 'yum -y autoremove' 'yum -y autoremove' 'yum -y autoremove')
+
+[[ $EUID -ne 0 ]] && red '注意: 请在root用户下运行脚本' && exit 1
+
+CMD=('$(grep -i pretty_name /etc/os-release 2>/dev/null | cut -d \' -f2)' '$(hostnamectl 2>/dev/null | grep -i system | cut -d : -f2)' '$(lsb_release -sd 2>/dev/null)' '$(grep -i description /etc/lsb-release 2>/dev/null | cut -d \' -f2)' '$(grep . /etc/redhat-release 2>/dev/null)' '$(grep . /etc/issue 2>/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')')
+
+for i in '${CMD[@]}'; do
+    SYS='$i' && [[ -n $SYS ]] && break
+done
+
+for ((int = 0; int < ${#REGEX[@]}; int++)); do
+    [[ $(echo '$SYS' | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM='${RELEASE[int]}' && [[ -n $SYSTEM ]] && break
+done
+
+[[ -z $SYSTEM ]] && red '目前暂不支持你的VPS的操作系统！' && exit 1
+
+if [[ -z $(type -P curl) ]]; then
+    if [[ ! $SYSTEM == 'CentOS' ]]; then
+        ${PACKAGE_UPDATE[int]}
+    fi
+    ${PACKAGE_INSTALL[int]} curl
+fi
+
+archAffix(){
+    case '$(uname -m)' in
+        x86_64 | amd64 ) echo 'amd64' ;;
+        armv8 | arm64 | aarch64 ) echo 'arm64' ;;
+        * ) red '不支持的CPU架构!' && exit 1 ;;
+    esac
+}
+
+realip(){
+    ip=$(curl -s4m8 ip.sb -k) || ip=$(curl -s6m8 ip.sb -k)
+}
+
+check_ip(){
+    warpv6=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    warpv4=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    if [[ $warpv4 =~ on|plus || $warpv6 =~ on|plus ]]; then
+        wg-quick down wgcf >/dev/null 2>&1
+        systemctl stop warp-go >/dev/null 2>&1
+        realip
+        systemctl start warp-go >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+    else
+        realip
+    fi
+}
+
+tuic_cert(){
+    green 'Tuic 协议证书申请方式如下：'
+    echo ''
+    echo -e ' ${GREEN}1.${PLAIN} 必应自签证书 ${YELLOW}（默认）${PLAIN}'
+    echo -e ' ${GREEN}2.${PLAIN} Acme 脚本申请'
+    echo -e ' ${GREEN}3.${PLAIN} 自定义证书路径'
+    echo ''
+    read -rp '请输入选项 [1-2]: ' certInput
+    if [[ $certInput == 3 ]]; then
+        read -p '请输入公钥文件 crt 的路径：' cert_path
+        yellow '公钥文件 crt 的路径：$cert_path '
+        read -p '请输入密钥文件 key 的路径：' key_path
+        yellow '密钥文件 key 的路径：$key_path '
+        read -p '请输入证书的域名：' domain
+        yellow '证书域名：$domain'
+    elif [[ $certInput == 2 ]]; then
+        cert_path='/root/cert.crt'
+        key_path='/root/private.key'
+        if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]] && [[ -f /root/ca.log ]]; then
+            domain=$(cat /root/ca.log)
+            green '检测到原有域名：$domain 的证书，正在应用'
+        else
+            WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+            WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+            if [[ $WARPv4Status =~ on|plus ]] || [[ $WARPv6Status =~ on|plus ]]; then
+                wg-quick down wgcf >/dev/null 2>&1
+                systemctl stop warp-go >/dev/null 2>&1
+                realip
+                wg-quick up wgcf >/dev/null 2>&1
+                systemctl start warp-go >/dev/null 2>&1
+            else
+                realip
+            fi
+            
+            read -p '请输入需要申请证书的域名：' domain
+            [[ -z $domain ]] && red '未输入域名，无法执行操作！' && exit 1
+            green '已输入的域名：$domain' && sleep 1
+            domainIP=$(dig @8.8.8.8 +time=2 +short '$domain' 2>/dev/null)
+            if echo $domainIP | grep -q 'network unreachable\|timed out' || [[ -z $domainIP ]]; then
+                domainIP=$(dig @2001:4860:4860::8888 +time=2 aaaa +short '$domain' 2>/dev/null)
+            fi
+            if echo $domainIP | grep -q 'network unreachable\|timed out' || [[ -z $domainIP ]] ; then
+                red '未解析出 IP，请检查域名是否输入有误' 
+                yellow '是否尝试强行匹配？'
+                green '1. 是，将使用强行匹配'
+                green '2. 否，退出脚本'
+                read -p '请输入选项 [1-2]：' ipChoice
+                if [[ $ipChoice == 1 ]]; then
+                    yellow '将尝试强行匹配以申请域名证书'
+                else
+                    red '将退出脚本'
+                    exit 1
+                fi
+            fi
+            
+            if [[ $domainIP == $ip ]]; then
+                ${PACKAGE_INSTALL[int]} curl wget sudo socat openssl
+                if [[ $SYSTEM == 'CentOS' ]]; then
+                    ${PACKAGE_INSTALL[int]} cronie
+                    systemctl start crond
+                    systemctl enable crond
+                else
+                    ${PACKAGE_INSTALL[int]} cron
+                    systemctl start cron
+                    systemctl enable cron
+                fi
+                curl https://get.acme.sh | sh -s email=$(date +%s%N | md5sum | cut -c 1-16)@gmail.com
+                source ~/.bashrc
+                bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+                bash ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+                if [[ -n $(echo $ip | grep ':') ]]; then
+                    bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --listen-v6 --insecure
+                else
+                    bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --insecure
+                fi
+                bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+                if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]]; then
+                    echo $domain > /root/ca.log
+                    sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
+                    echo '0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1' >> /etc/crontab
+                    green '证书申请成功! 脚本申请到的证书 (cert.crt) 和私钥 (private.key) 文件已保存到 /root 文件夹下'
+                    yellow '证书crt文件路径如下: /root/cert.crt'
+                    yellow '私钥key文件路径如下: /root/private.key'
+                fi
+            else
+                red '当前域名解析的IP与当前VPS使用的真实IP不匹配'
+                green '建议如下：'
+                yellow '1. 请确保CloudFlare小云朵为关闭状态(仅限DNS), 其他域名解析或CDN网站设置同理'
+                yellow '2. 请检查DNS解析设置的IP是否为VPS的真实IP'
+                yellow '3. 脚本可能跟不上时代, 建议截图发布到GitHub Issues、GitLab Issues、论坛或TG群询问'
+            fi
+        fi
+    else
+        cert_path='/root/bing/cert.crt'
+        key_path='/root/bing/private.key'
+        domain='www.bing.com'
+
+        mkdir /root/bing && cd /root/bing
+
+        openssl ecparam -genkey -name prime256v1 -out private.key
+        openssl req -new -x509 -days 36500 -key private.key -out cert.crt -subj '/CN=www.bing.com'
+    fi
+}
+
+tuic_port(){
+    read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+    [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+    until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; do
+        if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; then
+            echo -e '${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！'
+            read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+            [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+        fi
+    done
+    yellow '将在 tuic 节点使用的端口是：$port'
+}
+
+inst_tuv4(){
+    check_ip
+
+    if [[ ! ${SYSTEM} == 'CentOS' ]]; then
+        ${PACKAGE_UPDATE}
+        ${PACKAGE_INSTALL} bind-utils
+    fi
+    ${PACKAGE_INSTALL} wget curl sudo dnsutils
+
+    wget https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/files/tuic-latest-linux-$(archAffix) -O /usr/local/bin/tuic
+    if [[ -f '/usr/local/bin/tuic' ]]; then
+        chmod +x /usr/local/bin/tuic
+    else
+        red 'Tuic V4 内核安装失败！'
+        exit 1
+    fi
+
+    tuic_cert
+    tuic_port
+
+    read -p '设置 tuic Token（回车跳过为随机字符）：' token
+    [[ -z $token ]] && token=$(date +%s%N | md5sum | cut -c 1-8)
+
+    green '正在配置 Tuic...'
+    if [[ $domain == 'www.bing.com' ]]; then
+        finaldomain=$ip
+        snidomain=$domain
+    else
+        finaldomain=$domain
+        snidomain=$domain
+    fi
+
+    mkdir /etc/tuic >/dev/null 2>&1
+    cat << EOF > /etc/tuic/tuic.json
+{
+    'port': $port,
+    'token': ['$token'],
+    'certificate': '$cert_path',
+    'private_key': '$key_path',
+    'ip': '::',
+    'congestion_controller': 'bbr',
+    'alpn': ['h3']
+}
+EOF
+    mkdir /root/tuic >/dev/null 2>&1
+    cat << EOF > /root/tuic/tuic-client.json
+{
+    'relay': {
+        'server': '$finaldomain',
+        'port': $port,
+        'token': '$token',
+        'ip': '$ip',
+        'congestion_controller': 'bbr',
+        'udp_relay_mode': 'quic',
+        'alpn': ['h3'],
+        'disable_sni': false,
+        'reduce_rtt': false,
+        'max_udp_relay_packet_size': 1500
+    },
+    'local': {
+        'port': 6080,
+        'ip': '127.0.0.1'
+    },
+    'log_level': 'off'
+}
+EOF
+    cat << EOF > /root/tuic/tuic.txt
+Sagernet 与 小火箭 配置说明（以下6项必填）：
+{
+    服务器地址：$finaldomain
+    服务器端口：$port
+    token：$token
+    SNI: $snidomain
+    ALPN：h3
+    UDP 转发：开启
+    UDP 转发模式：QUIC
+    拥塞控制：bbr
+    跳过服务器证书验证：开启
+}
+EOF
+    cat << EOF > /root/tuic/clash-meta.yaml
+mixed-port: 7890
+external-controller: 127.0.0.1:9090
+allow-lan: false
+mode: rule
+log-level: debug
+ipv6: true
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+
+proxies:
+  - name: Misaka-tuicV4
+    server: $finaldomain
+    port: $port
+    type: tuic
+    token: $token
+    ip: $ip
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: quic
+    congestion-controller: bbr
+    skip-cert-verify: true
+    sni: $snidomain
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Misaka-tuicV4
+      
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+EOF
+    
+    url='tuic://$finaldomain:$port?password=$token&alpn=h3&mode=bbr#tuic-misaka'
+    echo ${url} > /root/tuic/url.txt
+
+    cat << EOF >/etc/systemd/system/tuic.service
+[Unit]
+Description=tuic Service
+Documentation=https://gitlab.com/Misaka-blog/tuic-script
+After=network.target
+[Service]
+User=root
+ExecStart=/usr/local/bin/tuic -c /etc/tuic/tuic.json
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=infinity
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    systemctl daemon-reload
+    systemctl enable tuic
+    systemctl start tuic
+
+    if [[ -n $(systemctl status tuic 2>/dev/null | grep -w active) && -f '/etc/tuic/tuic.json' ]]; then
+        green 'tuic 服务启动成功'
+    else
+        red 'tuic 服务启动失败，请运行 systemctl status tuic 查看服务状态并反馈，脚本退出' && exit 1
+    fi
+
+    showconf
+}
+
+unst_tuv4(){
+    systemctl stop tuic
+    systemctl disable tuic
+    rm -f /etc/systemd/system/tuic.service /root/tuic.sh
+    rm -rf /usr/local/bin/tuic /etc/tuic /root/tuic
+    
+    green 'Tuic V4 已彻底卸载完成！'
+}
+
+inst_tuv5(){
+    if [[ $(tuic -v) == '0.8.5' ]]; then
+        red '检测到已安装 Tuic V4，请先卸载再安装 Tuic V5！'
+        exit 1
+    fi
+
+    check_ip
+
+    if [[ ! ${SYSTEM} == 'CentOS' ]]; then
+        ${PACKAGE_UPDATE}
+    fi
+    ${PACKAGE_INSTALL} wget curl sudo
+
+    wget https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/files/tuic-server-latest-linux-$(archAffix) -O /usr/local/bin/tuic
+    if [[ -f '/usr/local/bin/tuic' ]]; then
+        chmod +x /usr/local/bin/tuic
+    else
+        red 'Tuic V5 内核安装失败！'
+        exit 1
+    fi
+
+    tuic_cert
+    tuic_port
+
+    read -p '设置 tuic UUID（回车跳过为随机 UUID）：' uuid
+    [[ -z $uuid ]] && uuid=$(cat /proc/sys/kernel/random/uuid)
+    yellow '使用在 tuic 节点的 UUID 为：$uuid'
+
+    read -p '设置 tuic 密码（回车跳过为随机字符）：' passwd
+    [[ -z $passwd ]] && passwd=$(date +%s%N | md5sum | cut -c 1-8)
+    yellow '使用在 tuic 节点的密码为：$passwd'
+
+    green '正在配置 Tuic...'
+    if [[ $domain == 'www.bing.com' ]]; then
+        finaldomain=$ip
+        snidomain=$domain
+    else
+        finaldomain=$domain
+        snidomain=$domain
+    fi
+
+    mkdir /etc/tuic >/dev/null 2>&1
+    cat << EOF > /etc/tuic/tuic.json
+{
+    'server': '[::]:$port',
+    'users': {
+        '$uuid': '$passwd'
+    },
+    'certificate': '$cert_path',
+    'private_key': '$key_path',
+    'congestion_control': 'bbr',
+    'alpn': ['h3'],
+    'log_level': 'warn'
+}
+EOF
+
+    mkdir /root/tuic >/dev/null 2>&1
+    cat << EOF > /root/tuic/tuic-client.json
+{
+    'relay': {
+        'server': '$finaldomain:$port',
+        'uuid': '$uuid',
+        'password': '$passwd',
+        'ip': '$ip',
+        'congestion_control': 'bbr',
+        'alpn': ['h3']
+    },
+    'local': {
+        'server': '127.0.0.1:6080'
+    },
+    'log_level': 'warn'
+}
+EOF
+    cat << EOF > /root/tuic/tuic.txt
+Sagernet、Nekobox 与 小火箭 配置说明（以下6项必填）：
+{
+    服务器地址：$finaldomain
+    服务器端口：$port
+    UUID: $uuid
+    密码：$passwd
+    SNI: $snidomain
+    ALPN：h3
+    UDP 转发：开启
+    UDP 转发模式：QUIC
+    拥塞控制：bbr
+    跳过服务器证书验证：开启
+}
+EOF
+
+    url='tuic://$uuid:$passwd@$finaldomain:$port?congestion_control=bbr&udp_relay_mode=quic&alpn=h3#tuicv5-misaka'
+    echo ${url} > /root/tuic/url.txt
+
+    cat << EOF > /root/tuic/clash-meta.yaml
+mixed-port: 7890
+external-controller: 127.0.0.1:9090
+allow-lan: false
+mode: rule
+log-level: debug
+ipv6: true
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+
+proxies:
+  - name: Misaka-tuicV5
+    server: $finaldomain
+    port: $port
+    type: tuic
+    uuid: $uuid
+    password: $passwd
+    ip: $ip
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: quic
+    congestion-controller: bbr
+    skip-cert-verify: true
+    sni: $snidomain
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Misaka-tuicV5
+      
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+EOF
+
+    cat << EOF >/etc/systemd/system/tuic.service
+[Unit]
+Description=tuic Service
+Documentation=https://gitlab.com/Misaka-blog/tuic-script
+After=network.target
+[Service]
+User=root
+ExecStart=/usr/local/bin/tuic -c /etc/tuic/tuic.json
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=infinity
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable tuic
+    systemctl start tuic
+    
+    if [[ -n $(systemctl status tuic 2>/dev/null | grep -w active) && -f '/etc/tuic/tuic.json' ]]; then
+        green 'tuic 服务启动成功'
+    else
+        red 'tuic 服务启动失败，请运行 systemctl status tuic 查看服务状态并反馈，脚本退出' && exit 1
+    fi
+
+    showconf
+}
+
+unst_tuv5(){
+    systemctl stop tuic
+    systemctl disable tuic
+    rm -f /etc/systemd/system/tuic.service /root/tuic.sh
+    rm -rf /usr/local/bin/tuic /etc/tuic /root/tuic
+    
+    green 'Tuic V5 已彻底卸载完成！'
+}
+
+starttuic(){
+    systemctl start tuic
+    systemctl enable tuic >/dev/null 2>&1
+}
+
+stoptuic(){
+    systemctl stop tuic
+    systemctl disable tuic >/dev/null 2>&1
+}
+
+tuicswitch(){
+    yellow '请选择你需要的操作：'
+    echo ''
+    echo -e ' ${GREEN}1.${PLAIN} 启动 Tuic'
+    echo -e ' ${GREEN}2.${PLAIN} 关闭 Tuic'
+    echo -e ' ${GREEN}3.${PLAIN} 重启 Tuic'
+    echo ''
+    read -rp '请输入选项 [0-3]: ' switchInput
+    case $switchInput in
+        1 ) starttuic ;;
+        2 ) stoptuic ;;
+        3 ) stoptuic && starttuic ;;
+        * ) exit 1 ;;
+    esac
+}
+
+changeport(){
+    if [[ $(tuic -v) == '0.8.5' ]]; then
+        oldport=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 2p | awk '{print $2}'| tr -d ',')
+
+        read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+        [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+
+        until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; do
+            if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; then
+                echo -e '${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！'
+                read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+                [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+            fi
+        done
+
+        sed -i '2s/$oldport/$port/g' /etc/tuic/tuic.json
+        sed -i '4s/$oldport/$port/g' /root/tuic/tuic-client.json
+        sed -i '4s/$oldport/$port/g' /root/tuic/tuic.txt
+        sed -i '19s/$oldport/$port/g' /root/tuic/clash-meta.yaml
+        sed -i 's/$oldport/$port/g' /root/tuic/url.txt
+
+        stoptuic && starttuic
+
+        green 'Tuic V4 节点端口已成功修改为：$port'
+        yellow '请手动更新客户端配置文件以使用节点'
+        showconf
+    else
+        oldport=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 2p | awk '{print $2}' | tr -d ',' | awk -F ':' '{print $4}' | tr -d ''')
+    
+        read -p '设置 tuic 端口[1-65535]（回车则随机分配端口）：' port
+        [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+
+        until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; do
+            if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; then
+                echo -e '${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！'
+                read -p '设置 tuic 端口[1-65535]（回车则随机分配端口）：' port
+                [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+            fi
+        done
+
+        sed -i '2s/$oldport/$port/g' /etc/tuic/tuic.json
+        sed -i '3s/$oldport/$port/g' /root/tuic/tuic-client.json
+        sed -i '4s/$oldport/$port/g' /root/tuic/tuic.txt
+        sed -i '19s/$oldport/$port/g' /root/tuic/clash-meta.yaml
+
+        stoptuic && starttuic
+
+        green 'Tuic 节点端口已成功修改为：$port'
+        yellow '请手动更新客户端配置文件以使用节点'
+        showconf
+    fi
+}
+
+changetoken(){
+    oldtoken=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 3p | awk '{print $2}' | tr -d ',[]'')
+
+    read -p '设置tuic Token（回车跳过为随机字符）：' token
+    [[ -z $token ]] && token=$(date +%s%N | md5sum | cut -c 1-8)
+
+    sed -i '3s/$oldtoken/$token/g' /etc/tuic/tuic.json
+    sed -i '5s/$oldtoken/$token/g' /root/tuic/tuic-client.json
+    sed -i '5s/$oldtoken/$token/g' /root/tuic/tuic.txt
+    sed -i '21s/$oldtoken/$token/g' /root/tuic/clash-meta.yaml
+    sed -i 's/$oldtoken/$token/g' /root/tuic/url.txt
+
+    stoptuic && starttuic
+
+    green 'Tuic 节点 Token 已成功修改为：$token'
+    yellow '请手动更新客户端配置文件以使用节点'
+    showconf
+}
+
+changeuuid(){
+    olduuid=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 4p | awk '{print $1}' | tr -d ':'')
+
+    read -p '设置 tuic UUID（回车跳过为随机 UUID）：' uuid
+    [[ -z $uuid ]] && uuid=$(cat /proc/sys/kernel/random/uuid)
+
+    sed -i '3s/$olduuid/$uuid/g' /etc/tuic/tuic.json
+    sed -i '4s/$olduuid/$uuid/g' /root/tuic/tuic-client.json
+    sed -i '5s/$olduuid/$uuid/g' /root/tuic/tuic.txt
+    sed -i '21s/$olduuid/$uuid/g' /root/tuic/clash-meta.yaml
+
+    stoptuic && starttuic
+
+    green 'Tuic 节点 UUID 已成功修改为：$uuid'
+    yellow '请手动更新客户端配置文件以使用节点'
+    showconf
+}
+
+changepasswd(){
+    oldpasswd=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 4p | awk '{print $2}' | tr -d ''')
+
+    read -p '设置 tuic 密码（回车跳过为随机字符）：' passwd
+    [[ -z $passwd ]] && passwd=$(date +%s%N | md5sum | cut -c 1-8)
+
+    sed -i '3s/$oldpasswd/$passwd/g' /etc/tuic/tuic.json
+    sed -i '5s/$oldpasswd/$passwd/g' /root/tuic/tuic-client.json
+    sed -i '6s/$oldpasswd/$passwd/g' /root/tuic/tuic.txt
+    sed -i '22s/$oldpasswd/$passwd/g' /root/tuic/clash-meta.yaml
+
+    stoptuic && starttuic
+
+    green 'Tuic 节点密码已成功修改为：$passwd'
+    yellow '请手动更新客户端配置文件以使用节点'
+    showconf
+}
+
+changeconf(){
+    if [[ $(tuic -v) == '0.8.5' ]]; then
+        green 'Tuic V4 配置变更选择如下:'
+        echo -e ' ${GREEN}1.${PLAIN} 修改端口'
+        echo -e ' ${GREEN}2.${PLAIN} 修改Token'
+        echo ''
+        read -p ' 请选择操作[1-2]：' confAnswer
+        case $confAnswer in
+            1 ) changeport ;;
+            2 ) changetoken ;;
+            * ) exit 1 ;;
+        esac
+    else
+        green 'Tuic V5 配置变更选择如下:'
+        echo -e ' ${GREEN}1.${PLAIN} 修改端口'
+        echo -e ' ${GREEN}2.${PLAIN} 修改 UUID'
+        echo -e ' ${GREEN}3.${PLAIN} 修改密码'
+        echo ''
+        read -p ' 请选择操作 [1-3]：' confAnswer
+        case $confAnswer in
+            1 ) changeport ;;
+            2 ) changeuuid ;;
+            3 ) changepasswd ;;
+            * ) exit 1 ;;
+        esac
+    fi
+}
+
+showconf(){
+    yellow '客户端配置文件 tuic-client.json 内容如下，并保存到 /root/tuic/tuic-client.json'
+    red '$(cat /root/tuic/tuic-client.json)'
+    yellow 'Clash Meta 客户端配置文件已保存到 /root/tuic/clash-meta.yaml'
+    yellow 'Tuic 节点配置明文如下，并保存到 /root/tuic/tuic.txt'
+    red '$(cat /root/tuic/tuic.txt)'
+    yellow 'Tuic 节点链接如下，并保存到 /root/tuic/url.txt'
+    red '$(cat /root/tuic/url.txt)'
+}
+
+menu() {
+    clear
+    echo '#############################################################'
+    echo -e '#                    ${RED}Tuic 一键安装脚本${PLAIN}                      #'
+    echo -e '# ${GREEN}作者${PLAIN}: MisakaNo の 小破站                                  #'
+    echo -e '# ${GREEN}博客${PLAIN}: https://blog.misaka.cyou                            #'
+    echo -e '# ${GREEN}GitHub 项目${PLAIN}: https://github.com/Misaka-blog               #'
+    echo -e '# ${GREEN}GitLab 项目${PLAIN}: https://gitlab.com/Misaka-blog               #'
+    echo -e '# ${GREEN}Telegram 频道${PLAIN}: https://t.me/misakanocchannel              #'
+    echo -e '# ${GREEN}Telegram 群组${PLAIN}: https://t.me/misakanoc                     #'
+    echo -e '# ${GREEN}YouTube 频道${PLAIN}: https://www.youtube.com/@misaka-blog        #'
+    echo '#############################################################'
+    echo ''
+    echo -e ' ${GREEN}1.${PLAIN} 安装 Tuic V4'
+    echo -e ' ${GREEN}2.${PLAIN} ${RED}卸载 Tuic V4${PLAIN}'
+    echo ' -------------'
+    echo -e ' ${GREEN}3.${PLAIN} 安装 Tuic V5'
+    echo -e ' ${GREEN}4.${PLAIN} ${RED}卸载 Tuic V5${PLAIN}'
+    echo ' -------------'
+    echo -e ' ${GREEN}5.${PLAIN} 关闭、启动、重启 Tuic'
+    echo -e ' ${GREEN}6.${PLAIN} 修改 Tuic 配置'
+    echo -e ' ${GREEN}7.${PLAIN} 显示 Tuic 配置文件'
+    echo ' -------------'
+    echo -e ' ${GREEN}0.${PLAIN} 退出脚本'
+    echo ''
+    read -rp '请输入选项 [0-7]: ' menuInput
+    case $menuInput in
+        1 ) inst_tuv4 ;;
+        2 ) unst_tuv4 ;;
+        3 ) inst_tuv5 ;;
+        4 ) unst_tuv5 ;;
+        5 ) tuicswitch ;;
+        6 ) changeconf ;;
+        7 ) showconf ;;
+        * ) exit 1 ;;
+    esac
+}
+
+menu
+```
+source
+https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/tuic.sh。">
+<meta property="og:title" content="TUIC v5一键脚本">
+<meta property="og:description" content="```
+#!/bin/bash
+
+export LANG=en_US.UTF-8
+
+RED='\033[31m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+PLAIN='\033[0m'
+
+red(){
+    echo -e '\033[31m\033[01m$1\033[0m'
+}
+
+green(){
+    echo -e '\033[32m\033[01m$1\033[0m'
+}
+
+yellow(){
+    echo -e '\033[33m\033[01m$1\033[0m'
+}
+
+# 判断系统及定义系统安装依赖方式
+REGEX=('debian' 'ubuntu' 'centos|red hat|kernel|oracle linux|alma|rocky' ''amazon linux'' 'fedora')
+RELEASE=('Debian' 'Ubuntu' 'CentOS' 'CentOS' 'Fedora')
+PACKAGE_UPDATE=('apt-get update' 'apt-get update' 'yum -y update' 'yum -y update' 'yum -y update')
+PACKAGE_INSTALL=('apt -y install' 'apt -y install' 'yum -y install' 'yum -y install' 'yum -y install')
+PACKAGE_REMOVE=('apt -y remove' 'apt -y remove' 'yum -y remove' 'yum -y remove' 'yum -y remove')
+PACKAGE_UNINSTALL=('apt -y autoremove' 'apt -y autoremove' 'yum -y autoremove' 'yum -y autoremove' 'yum -y autoremove')
+
+[[ $EUID -ne 0 ]] && red '注意: 请在root用户下运行脚本' && exit 1
+
+CMD=('$(grep -i pretty_name /etc/os-release 2>/dev/null | cut -d \' -f2)' '$(hostnamectl 2>/dev/null | grep -i system | cut -d : -f2)' '$(lsb_release -sd 2>/dev/null)' '$(grep -i description /etc/lsb-release 2>/dev/null | cut -d \' -f2)' '$(grep . /etc/redhat-release 2>/dev/null)' '$(grep . /etc/issue 2>/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')')
+
+for i in '${CMD[@]}'; do
+    SYS='$i' && [[ -n $SYS ]] && break
+done
+
+for ((int = 0; int < ${#REGEX[@]}; int++)); do
+    [[ $(echo '$SYS' | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] && SYSTEM='${RELEASE[int]}' && [[ -n $SYSTEM ]] && break
+done
+
+[[ -z $SYSTEM ]] && red '目前暂不支持你的VPS的操作系统！' && exit 1
+
+if [[ -z $(type -P curl) ]]; then
+    if [[ ! $SYSTEM == 'CentOS' ]]; then
+        ${PACKAGE_UPDATE[int]}
+    fi
+    ${PACKAGE_INSTALL[int]} curl
+fi
+
+archAffix(){
+    case '$(uname -m)' in
+        x86_64 | amd64 ) echo 'amd64' ;;
+        armv8 | arm64 | aarch64 ) echo 'arm64' ;;
+        * ) red '不支持的CPU架构!' && exit 1 ;;
+    esac
+}
+
+realip(){
+    ip=$(curl -s4m8 ip.sb -k) || ip=$(curl -s6m8 ip.sb -k)
+}
+
+check_ip(){
+    warpv6=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    warpv4=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    if [[ $warpv4 =~ on|plus || $warpv6 =~ on|plus ]]; then
+        wg-quick down wgcf >/dev/null 2>&1
+        systemctl stop warp-go >/dev/null 2>&1
+        realip
+        systemctl start warp-go >/dev/null 2>&1
+        wg-quick up wgcf >/dev/null 2>&1
+    else
+        realip
+    fi
+}
+
+tuic_cert(){
+    green 'Tuic 协议证书申请方式如下：'
+    echo ''
+    echo -e ' ${GREEN}1.${PLAIN} 必应自签证书 ${YELLOW}（默认）${PLAIN}'
+    echo -e ' ${GREEN}2.${PLAIN} Acme 脚本申请'
+    echo -e ' ${GREEN}3.${PLAIN} 自定义证书路径'
+    echo ''
+    read -rp '请输入选项 [1-2]: ' certInput
+    if [[ $certInput == 3 ]]; then
+        read -p '请输入公钥文件 crt 的路径：' cert_path
+        yellow '公钥文件 crt 的路径：$cert_path '
+        read -p '请输入密钥文件 key 的路径：' key_path
+        yellow '密钥文件 key 的路径：$key_path '
+        read -p '请输入证书的域名：' domain
+        yellow '证书域名：$domain'
+    elif [[ $certInput == 2 ]]; then
+        cert_path='/root/cert.crt'
+        key_path='/root/private.key'
+        if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]] && [[ -f /root/ca.log ]]; then
+            domain=$(cat /root/ca.log)
+            green '检测到原有域名：$domain 的证书，正在应用'
+        else
+            WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+            WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+            if [[ $WARPv4Status =~ on|plus ]] || [[ $WARPv6Status =~ on|plus ]]; then
+                wg-quick down wgcf >/dev/null 2>&1
+                systemctl stop warp-go >/dev/null 2>&1
+                realip
+                wg-quick up wgcf >/dev/null 2>&1
+                systemctl start warp-go >/dev/null 2>&1
+            else
+                realip
+            fi
+            
+            read -p '请输入需要申请证书的域名：' domain
+            [[ -z $domain ]] && red '未输入域名，无法执行操作！' && exit 1
+            green '已输入的域名：$domain' && sleep 1
+            domainIP=$(dig @8.8.8.8 +time=2 +short '$domain' 2>/dev/null)
+            if echo $domainIP | grep -q 'network unreachable\|timed out' || [[ -z $domainIP ]]; then
+                domainIP=$(dig @2001:4860:4860::8888 +time=2 aaaa +short '$domain' 2>/dev/null)
+            fi
+            if echo $domainIP | grep -q 'network unreachable\|timed out' || [[ -z $domainIP ]] ; then
+                red '未解析出 IP，请检查域名是否输入有误' 
+                yellow '是否尝试强行匹配？'
+                green '1. 是，将使用强行匹配'
+                green '2. 否，退出脚本'
+                read -p '请输入选项 [1-2]：' ipChoice
+                if [[ $ipChoice == 1 ]]; then
+                    yellow '将尝试强行匹配以申请域名证书'
+                else
+                    red '将退出脚本'
+                    exit 1
+                fi
+            fi
+            
+            if [[ $domainIP == $ip ]]; then
+                ${PACKAGE_INSTALL[int]} curl wget sudo socat openssl
+                if [[ $SYSTEM == 'CentOS' ]]; then
+                    ${PACKAGE_INSTALL[int]} cronie
+                    systemctl start crond
+                    systemctl enable crond
+                else
+                    ${PACKAGE_INSTALL[int]} cron
+                    systemctl start cron
+                    systemctl enable cron
+                fi
+                curl https://get.acme.sh | sh -s email=$(date +%s%N | md5sum | cut -c 1-16)@gmail.com
+                source ~/.bashrc
+                bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+                bash ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+                if [[ -n $(echo $ip | grep ':') ]]; then
+                    bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --listen-v6 --insecure
+                else
+                    bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --insecure
+                fi
+                bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+                if [[ -f /root/cert.crt && -f /root/private.key ]] && [[ -s /root/cert.crt && -s /root/private.key ]]; then
+                    echo $domain > /root/ca.log
+                    sed -i '/--cron/d' /etc/crontab >/dev/null 2>&1
+                    echo '0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f >/dev/null 2>&1' >> /etc/crontab
+                    green '证书申请成功! 脚本申请到的证书 (cert.crt) 和私钥 (private.key) 文件已保存到 /root 文件夹下'
+                    yellow '证书crt文件路径如下: /root/cert.crt'
+                    yellow '私钥key文件路径如下: /root/private.key'
+                fi
+            else
+                red '当前域名解析的IP与当前VPS使用的真实IP不匹配'
+                green '建议如下：'
+                yellow '1. 请确保CloudFlare小云朵为关闭状态(仅限DNS), 其他域名解析或CDN网站设置同理'
+                yellow '2. 请检查DNS解析设置的IP是否为VPS的真实IP'
+                yellow '3. 脚本可能跟不上时代, 建议截图发布到GitHub Issues、GitLab Issues、论坛或TG群询问'
+            fi
+        fi
+    else
+        cert_path='/root/bing/cert.crt'
+        key_path='/root/bing/private.key'
+        domain='www.bing.com'
+
+        mkdir /root/bing && cd /root/bing
+
+        openssl ecparam -genkey -name prime256v1 -out private.key
+        openssl req -new -x509 -days 36500 -key private.key -out cert.crt -subj '/CN=www.bing.com'
+    fi
+}
+
+tuic_port(){
+    read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+    [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+    until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; do
+        if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; then
+            echo -e '${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！'
+            read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+            [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+        fi
+    done
+    yellow '将在 tuic 节点使用的端口是：$port'
+}
+
+inst_tuv4(){
+    check_ip
+
+    if [[ ! ${SYSTEM} == 'CentOS' ]]; then
+        ${PACKAGE_UPDATE}
+        ${PACKAGE_INSTALL} bind-utils
+    fi
+    ${PACKAGE_INSTALL} wget curl sudo dnsutils
+
+    wget https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/files/tuic-latest-linux-$(archAffix) -O /usr/local/bin/tuic
+    if [[ -f '/usr/local/bin/tuic' ]]; then
+        chmod +x /usr/local/bin/tuic
+    else
+        red 'Tuic V4 内核安装失败！'
+        exit 1
+    fi
+
+    tuic_cert
+    tuic_port
+
+    read -p '设置 tuic Token（回车跳过为随机字符）：' token
+    [[ -z $token ]] && token=$(date +%s%N | md5sum | cut -c 1-8)
+
+    green '正在配置 Tuic...'
+    if [[ $domain == 'www.bing.com' ]]; then
+        finaldomain=$ip
+        snidomain=$domain
+    else
+        finaldomain=$domain
+        snidomain=$domain
+    fi
+
+    mkdir /etc/tuic >/dev/null 2>&1
+    cat << EOF > /etc/tuic/tuic.json
+{
+    'port': $port,
+    'token': ['$token'],
+    'certificate': '$cert_path',
+    'private_key': '$key_path',
+    'ip': '::',
+    'congestion_controller': 'bbr',
+    'alpn': ['h3']
+}
+EOF
+    mkdir /root/tuic >/dev/null 2>&1
+    cat << EOF > /root/tuic/tuic-client.json
+{
+    'relay': {
+        'server': '$finaldomain',
+        'port': $port,
+        'token': '$token',
+        'ip': '$ip',
+        'congestion_controller': 'bbr',
+        'udp_relay_mode': 'quic',
+        'alpn': ['h3'],
+        'disable_sni': false,
+        'reduce_rtt': false,
+        'max_udp_relay_packet_size': 1500
+    },
+    'local': {
+        'port': 6080,
+        'ip': '127.0.0.1'
+    },
+    'log_level': 'off'
+}
+EOF
+    cat << EOF > /root/tuic/tuic.txt
+Sagernet 与 小火箭 配置说明（以下6项必填）：
+{
+    服务器地址：$finaldomain
+    服务器端口：$port
+    token：$token
+    SNI: $snidomain
+    ALPN：h3
+    UDP 转发：开启
+    UDP 转发模式：QUIC
+    拥塞控制：bbr
+    跳过服务器证书验证：开启
+}
+EOF
+    cat << EOF > /root/tuic/clash-meta.yaml
+mixed-port: 7890
+external-controller: 127.0.0.1:9090
+allow-lan: false
+mode: rule
+log-level: debug
+ipv6: true
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+
+proxies:
+  - name: Misaka-tuicV4
+    server: $finaldomain
+    port: $port
+    type: tuic
+    token: $token
+    ip: $ip
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: quic
+    congestion-controller: bbr
+    skip-cert-verify: true
+    sni: $snidomain
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Misaka-tuicV4
+      
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+EOF
+    
+    url='tuic://$finaldomain:$port?password=$token&alpn=h3&mode=bbr#tuic-misaka'
+    echo ${url} > /root/tuic/url.txt
+
+    cat << EOF >/etc/systemd/system/tuic.service
+[Unit]
+Description=tuic Service
+Documentation=https://gitlab.com/Misaka-blog/tuic-script
+After=network.target
+[Service]
+User=root
+ExecStart=/usr/local/bin/tuic -c /etc/tuic/tuic.json
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=infinity
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    systemctl daemon-reload
+    systemctl enable tuic
+    systemctl start tuic
+
+    if [[ -n $(systemctl status tuic 2>/dev/null | grep -w active) && -f '/etc/tuic/tuic.json' ]]; then
+        green 'tuic 服务启动成功'
+    else
+        red 'tuic 服务启动失败，请运行 systemctl status tuic 查看服务状态并反馈，脚本退出' && exit 1
+    fi
+
+    showconf
+}
+
+unst_tuv4(){
+    systemctl stop tuic
+    systemctl disable tuic
+    rm -f /etc/systemd/system/tuic.service /root/tuic.sh
+    rm -rf /usr/local/bin/tuic /etc/tuic /root/tuic
+    
+    green 'Tuic V4 已彻底卸载完成！'
+}
+
+inst_tuv5(){
+    if [[ $(tuic -v) == '0.8.5' ]]; then
+        red '检测到已安装 Tuic V4，请先卸载再安装 Tuic V5！'
+        exit 1
+    fi
+
+    check_ip
+
+    if [[ ! ${SYSTEM} == 'CentOS' ]]; then
+        ${PACKAGE_UPDATE}
+    fi
+    ${PACKAGE_INSTALL} wget curl sudo
+
+    wget https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/files/tuic-server-latest-linux-$(archAffix) -O /usr/local/bin/tuic
+    if [[ -f '/usr/local/bin/tuic' ]]; then
+        chmod +x /usr/local/bin/tuic
+    else
+        red 'Tuic V5 内核安装失败！'
+        exit 1
+    fi
+
+    tuic_cert
+    tuic_port
+
+    read -p '设置 tuic UUID（回车跳过为随机 UUID）：' uuid
+    [[ -z $uuid ]] && uuid=$(cat /proc/sys/kernel/random/uuid)
+    yellow '使用在 tuic 节点的 UUID 为：$uuid'
+
+    read -p '设置 tuic 密码（回车跳过为随机字符）：' passwd
+    [[ -z $passwd ]] && passwd=$(date +%s%N | md5sum | cut -c 1-8)
+    yellow '使用在 tuic 节点的密码为：$passwd'
+
+    green '正在配置 Tuic...'
+    if [[ $domain == 'www.bing.com' ]]; then
+        finaldomain=$ip
+        snidomain=$domain
+    else
+        finaldomain=$domain
+        snidomain=$domain
+    fi
+
+    mkdir /etc/tuic >/dev/null 2>&1
+    cat << EOF > /etc/tuic/tuic.json
+{
+    'server': '[::]:$port',
+    'users': {
+        '$uuid': '$passwd'
+    },
+    'certificate': '$cert_path',
+    'private_key': '$key_path',
+    'congestion_control': 'bbr',
+    'alpn': ['h3'],
+    'log_level': 'warn'
+}
+EOF
+
+    mkdir /root/tuic >/dev/null 2>&1
+    cat << EOF > /root/tuic/tuic-client.json
+{
+    'relay': {
+        'server': '$finaldomain:$port',
+        'uuid': '$uuid',
+        'password': '$passwd',
+        'ip': '$ip',
+        'congestion_control': 'bbr',
+        'alpn': ['h3']
+    },
+    'local': {
+        'server': '127.0.0.1:6080'
+    },
+    'log_level': 'warn'
+}
+EOF
+    cat << EOF > /root/tuic/tuic.txt
+Sagernet、Nekobox 与 小火箭 配置说明（以下6项必填）：
+{
+    服务器地址：$finaldomain
+    服务器端口：$port
+    UUID: $uuid
+    密码：$passwd
+    SNI: $snidomain
+    ALPN：h3
+    UDP 转发：开启
+    UDP 转发模式：QUIC
+    拥塞控制：bbr
+    跳过服务器证书验证：开启
+}
+EOF
+
+    url='tuic://$uuid:$passwd@$finaldomain:$port?congestion_control=bbr&udp_relay_mode=quic&alpn=h3#tuicv5-misaka'
+    echo ${url} > /root/tuic/url.txt
+
+    cat << EOF > /root/tuic/clash-meta.yaml
+mixed-port: 7890
+external-controller: 127.0.0.1:9090
+allow-lan: false
+mode: rule
+log-level: debug
+ipv6: true
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+
+proxies:
+  - name: Misaka-tuicV5
+    server: $finaldomain
+    port: $port
+    type: tuic
+    uuid: $uuid
+    password: $passwd
+    ip: $ip
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: quic
+    congestion-controller: bbr
+    skip-cert-verify: true
+    sni: $snidomain
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Misaka-tuicV5
+      
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+EOF
+
+    cat << EOF >/etc/systemd/system/tuic.service
+[Unit]
+Description=tuic Service
+Documentation=https://gitlab.com/Misaka-blog/tuic-script
+After=network.target
+[Service]
+User=root
+ExecStart=/usr/local/bin/tuic -c /etc/tuic/tuic.json
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=infinity
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable tuic
+    systemctl start tuic
+    
+    if [[ -n $(systemctl status tuic 2>/dev/null | grep -w active) && -f '/etc/tuic/tuic.json' ]]; then
+        green 'tuic 服务启动成功'
+    else
+        red 'tuic 服务启动失败，请运行 systemctl status tuic 查看服务状态并反馈，脚本退出' && exit 1
+    fi
+
+    showconf
+}
+
+unst_tuv5(){
+    systemctl stop tuic
+    systemctl disable tuic
+    rm -f /etc/systemd/system/tuic.service /root/tuic.sh
+    rm -rf /usr/local/bin/tuic /etc/tuic /root/tuic
+    
+    green 'Tuic V5 已彻底卸载完成！'
+}
+
+starttuic(){
+    systemctl start tuic
+    systemctl enable tuic >/dev/null 2>&1
+}
+
+stoptuic(){
+    systemctl stop tuic
+    systemctl disable tuic >/dev/null 2>&1
+}
+
+tuicswitch(){
+    yellow '请选择你需要的操作：'
+    echo ''
+    echo -e ' ${GREEN}1.${PLAIN} 启动 Tuic'
+    echo -e ' ${GREEN}2.${PLAIN} 关闭 Tuic'
+    echo -e ' ${GREEN}3.${PLAIN} 重启 Tuic'
+    echo ''
+    read -rp '请输入选项 [0-3]: ' switchInput
+    case $switchInput in
+        1 ) starttuic ;;
+        2 ) stoptuic ;;
+        3 ) stoptuic && starttuic ;;
+        * ) exit 1 ;;
+    esac
+}
+
+changeport(){
+    if [[ $(tuic -v) == '0.8.5' ]]; then
+        oldport=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 2p | awk '{print $2}'| tr -d ',')
+
+        read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+        [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+
+        until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; do
+            if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; then
+                echo -e '${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！'
+                read -p '设置 tuic 端口 [1-65535]（回车则随机分配端口）：' port
+                [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+            fi
+        done
+
+        sed -i '2s/$oldport/$port/g' /etc/tuic/tuic.json
+        sed -i '4s/$oldport/$port/g' /root/tuic/tuic-client.json
+        sed -i '4s/$oldport/$port/g' /root/tuic/tuic.txt
+        sed -i '19s/$oldport/$port/g' /root/tuic/clash-meta.yaml
+        sed -i 's/$oldport/$port/g' /root/tuic/url.txt
+
+        stoptuic && starttuic
+
+        green 'Tuic V4 节点端口已成功修改为：$port'
+        yellow '请手动更新客户端配置文件以使用节点'
+        showconf
+    else
+        oldport=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 2p | awk '{print $2}' | tr -d ',' | awk -F ':' '{print $4}' | tr -d ''')
+    
+        read -p '设置 tuic 端口[1-65535]（回车则随机分配端口）：' port
+        [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+
+        until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; do
+            if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w '$port') ]]; then
+                echo -e '${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！'
+                read -p '设置 tuic 端口[1-65535]（回车则随机分配端口）：' port
+                [[ -z $port ]] && port=$(shuf -i 2000-65535 -n 1)
+            fi
+        done
+
+        sed -i '2s/$oldport/$port/g' /etc/tuic/tuic.json
+        sed -i '3s/$oldport/$port/g' /root/tuic/tuic-client.json
+        sed -i '4s/$oldport/$port/g' /root/tuic/tuic.txt
+        sed -i '19s/$oldport/$port/g' /root/tuic/clash-meta.yaml
+
+        stoptuic && starttuic
+
+        green 'Tuic 节点端口已成功修改为：$port'
+        yellow '请手动更新客户端配置文件以使用节点'
+        showconf
+    fi
+}
+
+changetoken(){
+    oldtoken=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 3p | awk '{print $2}' | tr -d ',[]'')
+
+    read -p '设置tuic Token（回车跳过为随机字符）：' token
+    [[ -z $token ]] && token=$(date +%s%N | md5sum | cut -c 1-8)
+
+    sed -i '3s/$oldtoken/$token/g' /etc/tuic/tuic.json
+    sed -i '5s/$oldtoken/$token/g' /root/tuic/tuic-client.json
+    sed -i '5s/$oldtoken/$token/g' /root/tuic/tuic.txt
+    sed -i '21s/$oldtoken/$token/g' /root/tuic/clash-meta.yaml
+    sed -i 's/$oldtoken/$token/g' /root/tuic/url.txt
+
+    stoptuic && starttuic
+
+    green 'Tuic 节点 Token 已成功修改为：$token'
+    yellow '请手动更新客户端配置文件以使用节点'
+    showconf
+}
+
+changeuuid(){
+    olduuid=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 4p | awk '{print $1}' | tr -d ':'')
+
+    read -p '设置 tuic UUID（回车跳过为随机 UUID）：' uuid
+    [[ -z $uuid ]] && uuid=$(cat /proc/sys/kernel/random/uuid)
+
+    sed -i '3s/$olduuid/$uuid/g' /etc/tuic/tuic.json
+    sed -i '4s/$olduuid/$uuid/g' /root/tuic/tuic-client.json
+    sed -i '5s/$olduuid/$uuid/g' /root/tuic/tuic.txt
+    sed -i '21s/$olduuid/$uuid/g' /root/tuic/clash-meta.yaml
+
+    stoptuic && starttuic
+
+    green 'Tuic 节点 UUID 已成功修改为：$uuid'
+    yellow '请手动更新客户端配置文件以使用节点'
+    showconf
+}
+
+changepasswd(){
+    oldpasswd=$(cat /etc/tuic/tuic.json 2>/dev/null | sed -n 4p | awk '{print $2}' | tr -d ''')
+
+    read -p '设置 tuic 密码（回车跳过为随机字符）：' passwd
+    [[ -z $passwd ]] && passwd=$(date +%s%N | md5sum | cut -c 1-8)
+
+    sed -i '3s/$oldpasswd/$passwd/g' /etc/tuic/tuic.json
+    sed -i '5s/$oldpasswd/$passwd/g' /root/tuic/tuic-client.json
+    sed -i '6s/$oldpasswd/$passwd/g' /root/tuic/tuic.txt
+    sed -i '22s/$oldpasswd/$passwd/g' /root/tuic/clash-meta.yaml
+
+    stoptuic && starttuic
+
+    green 'Tuic 节点密码已成功修改为：$passwd'
+    yellow '请手动更新客户端配置文件以使用节点'
+    showconf
+}
+
+changeconf(){
+    if [[ $(tuic -v) == '0.8.5' ]]; then
+        green 'Tuic V4 配置变更选择如下:'
+        echo -e ' ${GREEN}1.${PLAIN} 修改端口'
+        echo -e ' ${GREEN}2.${PLAIN} 修改Token'
+        echo ''
+        read -p ' 请选择操作[1-2]：' confAnswer
+        case $confAnswer in
+            1 ) changeport ;;
+            2 ) changetoken ;;
+            * ) exit 1 ;;
+        esac
+    else
+        green 'Tuic V5 配置变更选择如下:'
+        echo -e ' ${GREEN}1.${PLAIN} 修改端口'
+        echo -e ' ${GREEN}2.${PLAIN} 修改 UUID'
+        echo -e ' ${GREEN}3.${PLAIN} 修改密码'
+        echo ''
+        read -p ' 请选择操作 [1-3]：' confAnswer
+        case $confAnswer in
+            1 ) changeport ;;
+            2 ) changeuuid ;;
+            3 ) changepasswd ;;
+            * ) exit 1 ;;
+        esac
+    fi
+}
+
+showconf(){
+    yellow '客户端配置文件 tuic-client.json 内容如下，并保存到 /root/tuic/tuic-client.json'
+    red '$(cat /root/tuic/tuic-client.json)'
+    yellow 'Clash Meta 客户端配置文件已保存到 /root/tuic/clash-meta.yaml'
+    yellow 'Tuic 节点配置明文如下，并保存到 /root/tuic/tuic.txt'
+    red '$(cat /root/tuic/tuic.txt)'
+    yellow 'Tuic 节点链接如下，并保存到 /root/tuic/url.txt'
+    red '$(cat /root/tuic/url.txt)'
+}
+
+menu() {
+    clear
+    echo '#############################################################'
+    echo -e '#                    ${RED}Tuic 一键安装脚本${PLAIN}                      #'
+    echo -e '# ${GREEN}作者${PLAIN}: MisakaNo の 小破站                                  #'
+    echo -e '# ${GREEN}博客${PLAIN}: https://blog.misaka.cyou                            #'
+    echo -e '# ${GREEN}GitHub 项目${PLAIN}: https://github.com/Misaka-blog               #'
+    echo -e '# ${GREEN}GitLab 项目${PLAIN}: https://gitlab.com/Misaka-blog               #'
+    echo -e '# ${GREEN}Telegram 频道${PLAIN}: https://t.me/misakanocchannel              #'
+    echo -e '# ${GREEN}Telegram 群组${PLAIN}: https://t.me/misakanoc                     #'
+    echo -e '# ${GREEN}YouTube 频道${PLAIN}: https://www.youtube.com/@misaka-blog        #'
+    echo '#############################################################'
+    echo ''
+    echo -e ' ${GREEN}1.${PLAIN} 安装 Tuic V4'
+    echo -e ' ${GREEN}2.${PLAIN} ${RED}卸载 Tuic V4${PLAIN}'
+    echo ' -------------'
+    echo -e ' ${GREEN}3.${PLAIN} 安装 Tuic V5'
+    echo -e ' ${GREEN}4.${PLAIN} ${RED}卸载 Tuic V5${PLAIN}'
+    echo ' -------------'
+    echo -e ' ${GREEN}5.${PLAIN} 关闭、启动、重启 Tuic'
+    echo -e ' ${GREEN}6.${PLAIN} 修改 Tuic 配置'
+    echo -e ' ${GREEN}7.${PLAIN} 显示 Tuic 配置文件'
+    echo ' -------------'
+    echo -e ' ${GREEN}0.${PLAIN} 退出脚本'
+    echo ''
+    read -rp '请输入选项 [0-7]: ' menuInput
+    case $menuInput in
+        1 ) inst_tuv4 ;;
+        2 ) unst_tuv4 ;;
+        3 ) inst_tuv5 ;;
+        4 ) unst_tuv5 ;;
+        5 ) tuicswitch ;;
+        6 ) changeconf ;;
+        7 ) showconf ;;
+        * ) exit 1 ;;
+    esac
+}
+
+menu
+```
+source
+https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/tuic.sh。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://doulifv.github.io/blog/post/TUIC%20v5-yi-jian-jiao-ben.html">
+<meta property="og:image" content="https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg">
+<title>TUIC v5一键脚本</title>
+
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">TUIC v5一键脚本</h1>
+<div class="title-right">
+    <a href="https://doulifv.github.io/blog" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><pre class="notranslate"><code class="notranslate">#!/bin/bash
+
+export LANG=en_US.UTF-8
+
+RED="\033[31m"
+GREEN="\033[32m"
+YELLOW="\033[33m"
+PLAIN="\033[0m"
+
+red(){
+    echo -e "\033[31m\033[01m$1\033[0m"
+}
+
+green(){
+    echo -e "\033[32m\033[01m$1\033[0m"
+}
+
+yellow(){
+    echo -e "\033[33m\033[01m$1\033[0m"
+}
+
+# 判断系统及定义系统安装依赖方式
+REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'" "fedora")
+RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS" "Fedora")
+PACKAGE_UPDATE=("apt-get update" "apt-get update" "yum -y update" "yum -y update" "yum -y update")
+PACKAGE_INSTALL=("apt -y install" "apt -y install" "yum -y install" "yum -y install" "yum -y install")
+PACKAGE_REMOVE=("apt -y remove" "apt -y remove" "yum -y remove" "yum -y remove" "yum -y remove")
+PACKAGE_UNINSTALL=("apt -y autoremove" "apt -y autoremove" "yum -y autoremove" "yum -y autoremove" "yum -y autoremove")
+
+[[ $EUID -ne 0 ]] &amp;&amp; red "注意: 请在root用户下运行脚本" &amp;&amp; exit 1
+
+CMD=("$(grep -i pretty_name /etc/os-release 2&gt;/dev/null | cut -d \" -f2)" "$(hostnamectl 2&gt;/dev/null | grep -i system | cut -d : -f2)" "$(lsb_release -sd 2&gt;/dev/null)" "$(grep -i description /etc/lsb-release 2&gt;/dev/null | cut -d \" -f2)" "$(grep . /etc/redhat-release 2&gt;/dev/null)" "$(grep . /etc/issue 2&gt;/dev/null | cut -d \\ -f1 | sed '/^[ ]*$/d')")
+
+for i in "${CMD[@]}"; do
+    SYS="$i" &amp;&amp; [[ -n $SYS ]] &amp;&amp; break
+done
+
+for ((int = 0; int &lt; ${#REGEX[@]}; int++)); do
+    [[ $(echo "$SYS" | tr '[:upper:]' '[:lower:]') =~ ${REGEX[int]} ]] &amp;&amp; SYSTEM="${RELEASE[int]}" &amp;&amp; [[ -n $SYSTEM ]] &amp;&amp; break
+done
+
+[[ -z $SYSTEM ]] &amp;&amp; red "目前暂不支持你的VPS的操作系统！" &amp;&amp; exit 1
+
+if [[ -z $(type -P curl) ]]; then
+    if [[ ! $SYSTEM == "CentOS" ]]; then
+        ${PACKAGE_UPDATE[int]}
+    fi
+    ${PACKAGE_INSTALL[int]} curl
+fi
+
+archAffix(){
+    case "$(uname -m)" in
+        x86_64 | amd64 ) echo 'amd64' ;;
+        armv8 | arm64 | aarch64 ) echo 'arm64' ;;
+        * ) red "不支持的CPU架构!" &amp;&amp; exit 1 ;;
+    esac
+}
+
+realip(){
+    ip=$(curl -s4m8 ip.sb -k) || ip=$(curl -s6m8 ip.sb -k)
+}
+
+check_ip(){
+    warpv6=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    warpv4=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+    if [[ $warpv4 =~ on|plus || $warpv6 =~ on|plus ]]; then
+        wg-quick down wgcf &gt;/dev/null 2&gt;&amp;1
+        systemctl stop warp-go &gt;/dev/null 2&gt;&amp;1
+        realip
+        systemctl start warp-go &gt;/dev/null 2&gt;&amp;1
+        wg-quick up wgcf &gt;/dev/null 2&gt;&amp;1
+    else
+        realip
+    fi
+}
+
+tuic_cert(){
+    green "Tuic 协议证书申请方式如下："
+    echo ""
+    echo -e " ${GREEN}1.${PLAIN} 必应自签证书 ${YELLOW}（默认）${PLAIN}"
+    echo -e " ${GREEN}2.${PLAIN} Acme 脚本申请"
+    echo -e " ${GREEN}3.${PLAIN} 自定义证书路径"
+    echo ""
+    read -rp "请输入选项 [1-2]: " certInput
+    if [[ $certInput == 3 ]]; then
+        read -p "请输入公钥文件 crt 的路径：" cert_path
+        yellow "公钥文件 crt 的路径：$cert_path "
+        read -p "请输入密钥文件 key 的路径：" key_path
+        yellow "密钥文件 key 的路径：$key_path "
+        read -p "请输入证书的域名：" domain
+        yellow "证书域名：$domain"
+    elif [[ $certInput == 2 ]]; then
+        cert_path="/root/cert.crt"
+        key_path="/root/private.key"
+        if [[ -f /root/cert.crt &amp;&amp; -f /root/private.key ]] &amp;&amp; [[ -s /root/cert.crt &amp;&amp; -s /root/private.key ]] &amp;&amp; [[ -f /root/ca.log ]]; then
+            domain=$(cat /root/ca.log)
+            green "检测到原有域名：$domain 的证书，正在应用"
+        else
+            WARPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+            WARPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+            if [[ $WARPv4Status =~ on|plus ]] || [[ $WARPv6Status =~ on|plus ]]; then
+                wg-quick down wgcf &gt;/dev/null 2&gt;&amp;1
+                systemctl stop warp-go &gt;/dev/null 2&gt;&amp;1
+                realip
+                wg-quick up wgcf &gt;/dev/null 2&gt;&amp;1
+                systemctl start warp-go &gt;/dev/null 2&gt;&amp;1
+            else
+                realip
+            fi
+            
+            read -p "请输入需要申请证书的域名：" domain
+            [[ -z $domain ]] &amp;&amp; red "未输入域名，无法执行操作！" &amp;&amp; exit 1
+            green "已输入的域名：$domain" &amp;&amp; sleep 1
+            domainIP=$(dig @8.8.8.8 +time=2 +short "$domain" 2&gt;/dev/null)
+            if echo $domainIP | grep -q "network unreachable\|timed out" || [[ -z $domainIP ]]; then
+                domainIP=$(dig @2001:4860:4860::8888 +time=2 aaaa +short "$domain" 2&gt;/dev/null)
+            fi
+            if echo $domainIP | grep -q "network unreachable\|timed out" || [[ -z $domainIP ]] ; then
+                red "未解析出 IP，请检查域名是否输入有误" 
+                yellow "是否尝试强行匹配？"
+                green "1. 是，将使用强行匹配"
+                green "2. 否，退出脚本"
+                read -p "请输入选项 [1-2]：" ipChoice
+                if [[ $ipChoice == 1 ]]; then
+                    yellow "将尝试强行匹配以申请域名证书"
+                else
+                    red "将退出脚本"
+                    exit 1
+                fi
+            fi
+            
+            if [[ $domainIP == $ip ]]; then
+                ${PACKAGE_INSTALL[int]} curl wget sudo socat openssl
+                if [[ $SYSTEM == "CentOS" ]]; then
+                    ${PACKAGE_INSTALL[int]} cronie
+                    systemctl start crond
+                    systemctl enable crond
+                else
+                    ${PACKAGE_INSTALL[int]} cron
+                    systemctl start cron
+                    systemctl enable cron
+                fi
+                curl https://get.acme.sh | sh -s email=$(date +%s%N | md5sum | cut -c 1-16)@gmail.com
+                source ~/.bashrc
+                bash ~/.acme.sh/acme.sh --upgrade --auto-upgrade
+                bash ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+                if [[ -n $(echo $ip | grep ":") ]]; then
+                    bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --listen-v6 --insecure
+                else
+                    bash ~/.acme.sh/acme.sh --issue -d ${domain} --standalone -k ec-256 --insecure
+                fi
+                bash ~/.acme.sh/acme.sh --install-cert -d ${domain} --key-file /root/private.key --fullchain-file /root/cert.crt --ecc
+                if [[ -f /root/cert.crt &amp;&amp; -f /root/private.key ]] &amp;&amp; [[ -s /root/cert.crt &amp;&amp; -s /root/private.key ]]; then
+                    echo $domain &gt; /root/ca.log
+                    sed -i '/--cron/d' /etc/crontab &gt;/dev/null 2&gt;&amp;1
+                    echo "0 0 * * * root bash /root/.acme.sh/acme.sh --cron -f &gt;/dev/null 2&gt;&amp;1" &gt;&gt; /etc/crontab
+                    green "证书申请成功! 脚本申请到的证书 (cert.crt) 和私钥 (private.key) 文件已保存到 /root 文件夹下"
+                    yellow "证书crt文件路径如下: /root/cert.crt"
+                    yellow "私钥key文件路径如下: /root/private.key"
+                fi
+            else
+                red "当前域名解析的IP与当前VPS使用的真实IP不匹配"
+                green "建议如下："
+                yellow "1. 请确保CloudFlare小云朵为关闭状态(仅限DNS), 其他域名解析或CDN网站设置同理"
+                yellow "2. 请检查DNS解析设置的IP是否为VPS的真实IP"
+                yellow "3. 脚本可能跟不上时代, 建议截图发布到GitHub Issues、GitLab Issues、论坛或TG群询问"
+            fi
+        fi
+    else
+        cert_path="/root/bing/cert.crt"
+        key_path="/root/bing/private.key"
+        domain="www.bing.com"
+
+        mkdir /root/bing &amp;&amp; cd /root/bing
+
+        openssl ecparam -genkey -name prime256v1 -out private.key
+        openssl req -new -x509 -days 36500 -key private.key -out cert.crt -subj "/CN=www.bing.com"
+    fi
+}
+
+tuic_port(){
+    read -p "设置 tuic 端口 [1-65535]（回车则随机分配端口）：" port
+    [[ -z $port ]] &amp;&amp; port=$(shuf -i 2000-65535 -n 1)
+    until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w "$port") ]]; do
+        if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w "$port") ]]; then
+            echo -e "${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！"
+            read -p "设置 tuic 端口 [1-65535]（回车则随机分配端口）：" port
+            [[ -z $port ]] &amp;&amp; port=$(shuf -i 2000-65535 -n 1)
+        fi
+    done
+    yellow "将在 tuic 节点使用的端口是：$port"
+}
+
+inst_tuv4(){
+    check_ip
+
+    if [[ ! ${SYSTEM} == "CentOS" ]]; then
+        ${PACKAGE_UPDATE}
+        ${PACKAGE_INSTALL} bind-utils
+    fi
+    ${PACKAGE_INSTALL} wget curl sudo dnsutils
+
+    wget https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/files/tuic-latest-linux-$(archAffix) -O /usr/local/bin/tuic
+    if [[ -f "/usr/local/bin/tuic" ]]; then
+        chmod +x /usr/local/bin/tuic
+    else
+        red "Tuic V4 内核安装失败！"
+        exit 1
+    fi
+
+    tuic_cert
+    tuic_port
+
+    read -p "设置 tuic Token（回车跳过为随机字符）：" token
+    [[ -z $token ]] &amp;&amp; token=$(date +%s%N | md5sum | cut -c 1-8)
+
+    green "正在配置 Tuic..."
+    if [[ $domain == "www.bing.com" ]]; then
+        finaldomain=$ip
+        snidomain=$domain
+    else
+        finaldomain=$domain
+        snidomain=$domain
+    fi
+
+    mkdir /etc/tuic &gt;/dev/null 2&gt;&amp;1
+    cat &lt;&lt; EOF &gt; /etc/tuic/tuic.json
+{
+    "port": $port,
+    "token": ["$token"],
+    "certificate": "$cert_path",
+    "private_key": "$key_path",
+    "ip": "::",
+    "congestion_controller": "bbr",
+    "alpn": ["h3"]
+}
+EOF
+    mkdir /root/tuic &gt;/dev/null 2&gt;&amp;1
+    cat &lt;&lt; EOF &gt; /root/tuic/tuic-client.json
+{
+    "relay": {
+        "server": "$finaldomain",
+        "port": $port,
+        "token": "$token",
+        "ip": "$ip",
+        "congestion_controller": "bbr",
+        "udp_relay_mode": "quic",
+        "alpn": ["h3"],
+        "disable_sni": false,
+        "reduce_rtt": false,
+        "max_udp_relay_packet_size": 1500
+    },
+    "local": {
+        "port": 6080,
+        "ip": "127.0.0.1"
+    },
+    "log_level": "off"
+}
+EOF
+    cat &lt;&lt; EOF &gt; /root/tuic/tuic.txt
+Sagernet 与 小火箭 配置说明（以下6项必填）：
+{
+    服务器地址：$finaldomain
+    服务器端口：$port
+    token：$token
+    SNI: $snidomain
+    ALPN：h3
+    UDP 转发：开启
+    UDP 转发模式：QUIC
+    拥塞控制：bbr
+    跳过服务器证书验证：开启
+}
+EOF
+    cat &lt;&lt; EOF &gt; /root/tuic/clash-meta.yaml
+mixed-port: 7890
+external-controller: 127.0.0.1:9090
+allow-lan: false
+mode: rule
+log-level: debug
+ipv6: true
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+
+proxies:
+  - name: Misaka-tuicV4
+    server: $finaldomain
+    port: $port
+    type: tuic
+    token: $token
+    ip: $ip
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: quic
+    congestion-controller: bbr
+    skip-cert-verify: true
+    sni: $snidomain
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Misaka-tuicV4
+      
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+EOF
+    
+    url="tuic://$finaldomain:$port?password=$token&amp;alpn=h3&amp;mode=bbr#tuic-misaka"
+    echo ${url} &gt; /root/tuic/url.txt
+
+    cat &lt;&lt; EOF &gt;/etc/systemd/system/tuic.service
+[Unit]
+Description=tuic Service
+Documentation=https://gitlab.com/Misaka-blog/tuic-script
+After=network.target
+[Service]
+User=root
+ExecStart=/usr/local/bin/tuic -c /etc/tuic/tuic.json
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=infinity
+[Install]
+WantedBy=multi-user.target
+EOF
+    
+    systemctl daemon-reload
+    systemctl enable tuic
+    systemctl start tuic
+
+    if [[ -n $(systemctl status tuic 2&gt;/dev/null | grep -w active) &amp;&amp; -f '/etc/tuic/tuic.json' ]]; then
+        green "tuic 服务启动成功"
+    else
+        red "tuic 服务启动失败，请运行 systemctl status tuic 查看服务状态并反馈，脚本退出" &amp;&amp; exit 1
+    fi
+
+    showconf
+}
+
+unst_tuv4(){
+    systemctl stop tuic
+    systemctl disable tuic
+    rm -f /etc/systemd/system/tuic.service /root/tuic.sh
+    rm -rf /usr/local/bin/tuic /etc/tuic /root/tuic
+    
+    green "Tuic V4 已彻底卸载完成！"
+}
+
+inst_tuv5(){
+    if [[ $(tuic -v) == "0.8.5" ]]; then
+        red "检测到已安装 Tuic V4，请先卸载再安装 Tuic V5！"
+        exit 1
+    fi
+
+    check_ip
+
+    if [[ ! ${SYSTEM} == "CentOS" ]]; then
+        ${PACKAGE_UPDATE}
+    fi
+    ${PACKAGE_INSTALL} wget curl sudo
+
+    wget https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/files/tuic-server-latest-linux-$(archAffix) -O /usr/local/bin/tuic
+    if [[ -f "/usr/local/bin/tuic" ]]; then
+        chmod +x /usr/local/bin/tuic
+    else
+        red "Tuic V5 内核安装失败！"
+        exit 1
+    fi
+
+    tuic_cert
+    tuic_port
+
+    read -p "设置 tuic UUID（回车跳过为随机 UUID）：" uuid
+    [[ -z $uuid ]] &amp;&amp; uuid=$(cat /proc/sys/kernel/random/uuid)
+    yellow "使用在 tuic 节点的 UUID 为：$uuid"
+
+    read -p "设置 tuic 密码（回车跳过为随机字符）：" passwd
+    [[ -z $passwd ]] &amp;&amp; passwd=$(date +%s%N | md5sum | cut -c 1-8)
+    yellow "使用在 tuic 节点的密码为：$passwd"
+
+    green "正在配置 Tuic..."
+    if [[ $domain == "www.bing.com" ]]; then
+        finaldomain=$ip
+        snidomain=$domain
+    else
+        finaldomain=$domain
+        snidomain=$domain
+    fi
+
+    mkdir /etc/tuic &gt;/dev/null 2&gt;&amp;1
+    cat &lt;&lt; EOF &gt; /etc/tuic/tuic.json
+{
+    "server": "[::]:$port",
+    "users": {
+        "$uuid": "$passwd"
+    },
+    "certificate": "$cert_path",
+    "private_key": "$key_path",
+    "congestion_control": "bbr",
+    "alpn": ["h3"],
+    "log_level": "warn"
+}
+EOF
+
+    mkdir /root/tuic &gt;/dev/null 2&gt;&amp;1
+    cat &lt;&lt; EOF &gt; /root/tuic/tuic-client.json
+{
+    "relay": {
+        "server": "$finaldomain:$port",
+        "uuid": "$uuid",
+        "password": "$passwd",
+        "ip": "$ip",
+        "congestion_control": "bbr",
+        "alpn": ["h3"]
+    },
+    "local": {
+        "server": "127.0.0.1:6080"
+    },
+    "log_level": "warn"
+}
+EOF
+    cat &lt;&lt; EOF &gt; /root/tuic/tuic.txt
+Sagernet、Nekobox 与 小火箭 配置说明（以下6项必填）：
+{
+    服务器地址：$finaldomain
+    服务器端口：$port
+    UUID: $uuid
+    密码：$passwd
+    SNI: $snidomain
+    ALPN：h3
+    UDP 转发：开启
+    UDP 转发模式：QUIC
+    拥塞控制：bbr
+    跳过服务器证书验证：开启
+}
+EOF
+
+    url="tuic://$uuid:$passwd@$finaldomain:$port?congestion_control=bbr&amp;udp_relay_mode=quic&amp;alpn=h3#tuicv5-misaka"
+    echo ${url} &gt; /root/tuic/url.txt
+
+    cat &lt;&lt; EOF &gt; /root/tuic/clash-meta.yaml
+mixed-port: 7890
+external-controller: 127.0.0.1:9090
+allow-lan: false
+mode: rule
+log-level: debug
+ipv6: true
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1
+    - 114.114.114.114
+
+proxies:
+  - name: Misaka-tuicV5
+    server: $finaldomain
+    port: $port
+    type: tuic
+    uuid: $uuid
+    password: $passwd
+    ip: $ip
+    alpn: [h3]
+    disable-sni: true
+    reduce-rtt: true
+    request-timeout: 8000
+    udp-relay-mode: quic
+    congestion-controller: bbr
+    skip-cert-verify: true
+    sni: $snidomain
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Misaka-tuicV5
+      
+rules:
+  - GEOIP,CN,DIRECT
+  - MATCH,Proxy
+EOF
+
+    cat &lt;&lt; EOF &gt;/etc/systemd/system/tuic.service
+[Unit]
+Description=tuic Service
+Documentation=https://gitlab.com/Misaka-blog/tuic-script
+After=network.target
+[Service]
+User=root
+ExecStart=/usr/local/bin/tuic -c /etc/tuic/tuic.json
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=infinity
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    systemctl daemon-reload
+    systemctl enable tuic
+    systemctl start tuic
+    
+    if [[ -n $(systemctl status tuic 2&gt;/dev/null | grep -w active) &amp;&amp; -f '/etc/tuic/tuic.json' ]]; then
+        green "tuic 服务启动成功"
+    else
+        red "tuic 服务启动失败，请运行 systemctl status tuic 查看服务状态并反馈，脚本退出" &amp;&amp; exit 1
+    fi
+
+    showconf
+}
+
+unst_tuv5(){
+    systemctl stop tuic
+    systemctl disable tuic
+    rm -f /etc/systemd/system/tuic.service /root/tuic.sh
+    rm -rf /usr/local/bin/tuic /etc/tuic /root/tuic
+    
+    green "Tuic V5 已彻底卸载完成！"
+}
+
+starttuic(){
+    systemctl start tuic
+    systemctl enable tuic &gt;/dev/null 2&gt;&amp;1
+}
+
+stoptuic(){
+    systemctl stop tuic
+    systemctl disable tuic &gt;/dev/null 2&gt;&amp;1
+}
+
+tuicswitch(){
+    yellow "请选择你需要的操作："
+    echo ""
+    echo -e " ${GREEN}1.${PLAIN} 启动 Tuic"
+    echo -e " ${GREEN}2.${PLAIN} 关闭 Tuic"
+    echo -e " ${GREEN}3.${PLAIN} 重启 Tuic"
+    echo ""
+    read -rp "请输入选项 [0-3]: " switchInput
+    case $switchInput in
+        1 ) starttuic ;;
+        2 ) stoptuic ;;
+        3 ) stoptuic &amp;&amp; starttuic ;;
+        * ) exit 1 ;;
+    esac
+}
+
+changeport(){
+    if [[ $(tuic -v) == "0.8.5" ]]; then
+        oldport=$(cat /etc/tuic/tuic.json 2&gt;/dev/null | sed -n 2p | awk '{print $2}'| tr -d ',')
+
+        read -p "设置 tuic 端口 [1-65535]（回车则随机分配端口）：" port
+        [[ -z $port ]] &amp;&amp; port=$(shuf -i 2000-65535 -n 1)
+
+        until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w "$port") ]]; do
+            if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w "$port") ]]; then
+                echo -e "${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！"
+                read -p "设置 tuic 端口 [1-65535]（回车则随机分配端口）：" port
+                [[ -z $port ]] &amp;&amp; port=$(shuf -i 2000-65535 -n 1)
+            fi
+        done
+
+        sed -i "2s/$oldport/$port/g" /etc/tuic/tuic.json
+        sed -i "4s/$oldport/$port/g" /root/tuic/tuic-client.json
+        sed -i "4s/$oldport/$port/g" /root/tuic/tuic.txt
+        sed -i "19s/$oldport/$port/g" /root/tuic/clash-meta.yaml
+        sed -i "s/$oldport/$port/g" /root/tuic/url.txt
+
+        stoptuic &amp;&amp; starttuic
+
+        green "Tuic V4 节点端口已成功修改为：$port"
+        yellow "请手动更新客户端配置文件以使用节点"
+        showconf
+    else
+        oldport=$(cat /etc/tuic/tuic.json 2&gt;/dev/null | sed -n 2p | awk '{print $2}' | tr -d ',' | awk -F ":" '{print $4}' | tr -d '"')
+    
+        read -p "设置 tuic 端口[1-65535]（回车则随机分配端口）：" port
+        [[ -z $port ]] &amp;&amp; port=$(shuf -i 2000-65535 -n 1)
+
+        until [[ -z $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w "$port") ]]; do
+            if [[ -n $(ss -tunlp | grep -w udp | awk '{print $5}' | sed 's/.*://g' | grep -w "$port") ]]; then
+                echo -e "${RED} $port ${PLAIN} 端口已经被其他程序占用，请更换端口重试！"
+                read -p "设置 tuic 端口[1-65535]（回车则随机分配端口）：" port
+                [[ -z $port ]] &amp;&amp; port=$(shuf -i 2000-65535 -n 1)
+            fi
+        done
+
+        sed -i "2s/$oldport/$port/g" /etc/tuic/tuic.json
+        sed -i "3s/$oldport/$port/g" /root/tuic/tuic-client.json
+        sed -i "4s/$oldport/$port/g" /root/tuic/tuic.txt
+        sed -i "19s/$oldport/$port/g" /root/tuic/clash-meta.yaml
+
+        stoptuic &amp;&amp; starttuic
+
+        green "Tuic 节点端口已成功修改为：$port"
+        yellow "请手动更新客户端配置文件以使用节点"
+        showconf
+    fi
+}
+
+changetoken(){
+    oldtoken=$(cat /etc/tuic/tuic.json 2&gt;/dev/null | sed -n 3p | awk '{print $2}' | tr -d ',[]"')
+
+    read -p "设置tuic Token（回车跳过为随机字符）：" token
+    [[ -z $token ]] &amp;&amp; token=$(date +%s%N | md5sum | cut -c 1-8)
+
+    sed -i "3s/$oldtoken/$token/g" /etc/tuic/tuic.json
+    sed -i "5s/$oldtoken/$token/g" /root/tuic/tuic-client.json
+    sed -i "5s/$oldtoken/$token/g" /root/tuic/tuic.txt
+    sed -i "21s/$oldtoken/$token/g" /root/tuic/clash-meta.yaml
+    sed -i "s/$oldtoken/$token/g" /root/tuic/url.txt
+
+    stoptuic &amp;&amp; starttuic
+
+    green "Tuic 节点 Token 已成功修改为：$token"
+    yellow "请手动更新客户端配置文件以使用节点"
+    showconf
+}
+
+changeuuid(){
+    olduuid=$(cat /etc/tuic/tuic.json 2&gt;/dev/null | sed -n 4p | awk '{print $1}' | tr -d ':"')
+
+    read -p "设置 tuic UUID（回车跳过为随机 UUID）：" uuid
+    [[ -z $uuid ]] &amp;&amp; uuid=$(cat /proc/sys/kernel/random/uuid)
+
+    sed -i "3s/$olduuid/$uuid/g" /etc/tuic/tuic.json
+    sed -i "4s/$olduuid/$uuid/g" /root/tuic/tuic-client.json
+    sed -i "5s/$olduuid/$uuid/g" /root/tuic/tuic.txt
+    sed -i "21s/$olduuid/$uuid/g" /root/tuic/clash-meta.yaml
+
+    stoptuic &amp;&amp; starttuic
+
+    green "Tuic 节点 UUID 已成功修改为：$uuid"
+    yellow "请手动更新客户端配置文件以使用节点"
+    showconf
+}
+
+changepasswd(){
+    oldpasswd=$(cat /etc/tuic/tuic.json 2&gt;/dev/null | sed -n 4p | awk '{print $2}' | tr -d '"')
+
+    read -p "设置 tuic 密码（回车跳过为随机字符）：" passwd
+    [[ -z $passwd ]] &amp;&amp; passwd=$(date +%s%N | md5sum | cut -c 1-8)
+
+    sed -i "3s/$oldpasswd/$passwd/g" /etc/tuic/tuic.json
+    sed -i "5s/$oldpasswd/$passwd/g" /root/tuic/tuic-client.json
+    sed -i "6s/$oldpasswd/$passwd/g" /root/tuic/tuic.txt
+    sed -i "22s/$oldpasswd/$passwd/g" /root/tuic/clash-meta.yaml
+
+    stoptuic &amp;&amp; starttuic
+
+    green "Tuic 节点密码已成功修改为：$passwd"
+    yellow "请手动更新客户端配置文件以使用节点"
+    showconf
+}
+
+changeconf(){
+    if [[ $(tuic -v) == "0.8.5" ]]; then
+        green "Tuic V4 配置变更选择如下:"
+        echo -e " ${GREEN}1.${PLAIN} 修改端口"
+        echo -e " ${GREEN}2.${PLAIN} 修改Token"
+        echo ""
+        read -p " 请选择操作[1-2]：" confAnswer
+        case $confAnswer in
+            1 ) changeport ;;
+            2 ) changetoken ;;
+            * ) exit 1 ;;
+        esac
+    else
+        green "Tuic V5 配置变更选择如下:"
+        echo -e " ${GREEN}1.${PLAIN} 修改端口"
+        echo -e " ${GREEN}2.${PLAIN} 修改 UUID"
+        echo -e " ${GREEN}3.${PLAIN} 修改密码"
+        echo ""
+        read -p " 请选择操作 [1-3]：" confAnswer
+        case $confAnswer in
+            1 ) changeport ;;
+            2 ) changeuuid ;;
+            3 ) changepasswd ;;
+            * ) exit 1 ;;
+        esac
+    fi
+}
+
+showconf(){
+    yellow "客户端配置文件 tuic-client.json 内容如下，并保存到 /root/tuic/tuic-client.json"
+    red "$(cat /root/tuic/tuic-client.json)"
+    yellow "Clash Meta 客户端配置文件已保存到 /root/tuic/clash-meta.yaml"
+    yellow "Tuic 节点配置明文如下，并保存到 /root/tuic/tuic.txt"
+    red "$(cat /root/tuic/tuic.txt)"
+    yellow "Tuic 节点链接如下，并保存到 /root/tuic/url.txt"
+    red "$(cat /root/tuic/url.txt)"
+}
+
+menu() {
+    clear
+    echo "#############################################################"
+    echo -e "#                    ${RED}Tuic 一键安装脚本${PLAIN}                      #"
+    echo -e "# ${GREEN}作者${PLAIN}: MisakaNo の 小破站                                  #"
+    echo -e "# ${GREEN}博客${PLAIN}: https://blog.misaka.cyou                            #"
+    echo -e "# ${GREEN}GitHub 项目${PLAIN}: https://github.com/Misaka-blog               #"
+    echo -e "# ${GREEN}GitLab 项目${PLAIN}: https://gitlab.com/Misaka-blog               #"
+    echo -e "# ${GREEN}Telegram 频道${PLAIN}: https://t.me/misakanocchannel              #"
+    echo -e "# ${GREEN}Telegram 群组${PLAIN}: https://t.me/misakanoc                     #"
+    echo -e "# ${GREEN}YouTube 频道${PLAIN}: https://www.youtube.com/@misaka-blog        #"
+    echo "#############################################################"
+    echo ""
+    echo -e " ${GREEN}1.${PLAIN} 安装 Tuic V4"
+    echo -e " ${GREEN}2.${PLAIN} ${RED}卸载 Tuic V4${PLAIN}"
+    echo " -------------"
+    echo -e " ${GREEN}3.${PLAIN} 安装 Tuic V5"
+    echo -e " ${GREEN}4.${PLAIN} ${RED}卸载 Tuic V5${PLAIN}"
+    echo " -------------"
+    echo -e " ${GREEN}5.${PLAIN} 关闭、启动、重启 Tuic"
+    echo -e " ${GREEN}6.${PLAIN} 修改 Tuic 配置"
+    echo -e " ${GREEN}7.${PLAIN} 显示 Tuic 配置文件"
+    echo " -------------"
+    echo -e " ${GREEN}0.${PLAIN} 退出脚本"
+    echo ""
+    read -rp "请输入选项 [0-7]: " menuInput
+    case $menuInput in
+        1 ) inst_tuv4 ;;
+        2 ) unst_tuv4 ;;
+        3 ) inst_tuv5 ;;
+        4 ) unst_tuv5 ;;
+        5 ) tuicswitch ;;
+        6 ) changeconf ;;
+        7 ) showconf ;;
+        * ) exit 1 ;;
+    esac
+}
+
+menu
+</code></pre>
+<p>source<br>
+<a href="https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/tuic.sh" rel="nofollow">https://gitlab.com/Misaka-blog/tuic-script/-/raw/main/tuic.sh</a></p></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://doulifv.github.io/blog">Forestlake</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if("10/10/2025"!=""){
+    var startSite=new Date("10/10/2025");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","doulifv/blog");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+
+
+</html>

@@ -23,11 +23,11 @@ systemctl restart netfilter-persistent
 sudo iptables -t nat -L -v
 ```
 ## 还原
-删除全部iptables nat规则，使用 **_-F_** 选项可以删除nat表中所有链中的所有规则。
+删除全部iptables nat规则，使用 -F 选项可以删除nat表中所有链中的所有规则。
 ```
 iptables -t nat -F
 ```
----
+***
 ## 拓展 删除特定NAT规则
 查看规则列表及编号
 ```
@@ -39,4 +39,6 @@ iptables -t nat -L --line-numbers
 iptables -t nat -D POSTROUTING 7 
 ```
 ---
-参考：[Proxy | Hysteria 2 端口跳跃](https://blog.jianbing.tk/p/hy2-port-hopping/)
+参考：
+[Proxy | Hysteria 2 端口跳跃](https://blog.jianbing.tk/p/hy2-port-hopping/)
+https://hysteria.network/zh/docs/advanced/Port-Hopping/

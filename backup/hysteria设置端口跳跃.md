@@ -14,7 +14,7 @@ sudo iptables -t nat -A PREROUTING -i ens18 -p udp --dport 31000:32000 -j REDIRE
 ```
 sudo netfilter-persistent save
 ```
-重启netfilter-persistent严重，效果检验是否保持完好
+重启netfilter-persistent验证，检验配置是否保持完好
 ```
 systemctl restart netfilter-persistent
 ```

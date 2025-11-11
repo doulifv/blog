@@ -10,9 +10,11 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="实现这个方法的原理很简单。">
+<meta name="description" content="### 说明：实现原理
+实现这个方法的原理很简单。">
 <meta property="og:title" content="一键禁用windows10/11系统自动更新至2099年">
-<meta property="og:description" content="实现这个方法的原理很简单。">
+<meta property="og:description" content="### 说明：实现原理
+实现这个方法的原理很简单。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://doulifv.github.io/blog/post/yi-jian-jin-yong-windows10-11-xi-tong-zi-dong-geng-xin-zhi-2099-nian.html">
 <meta property="og:image" content="https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg">
@@ -77,10 +79,18 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><p>实现这个方法的原理很简单。当我们手动点击"暂停更新7天"时，Windows Update会在注册表"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"中创建几个键值，用来保存本次检查更新时间和下次检查更新时间等信息。如果我们手动将这些时间点修改为2099年，就可以长期暂停Windows的更新，而且不会影响到Microsoft Store、Xbox游戏等功能的使用。<br>
-复制以下带代码并将其另存为 <strong>.bat</strong> 结尾的批处理脚本。</p>
-<p>请注意：在保存bat文件时，保存类型选择"所有文档"，编码选择 <strong>"ANSI"</strong> ，否则运行后会显示乱码。</p>
-<hr>
+<div class="markdown-body" id="postBody"><h3>说明：实现原理</h3>
+<p>实现这个方法的原理很简单。当我们手动点击"暂停更新7天"时，Windows Update会在注册表"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings"中创建几个键值，用来保存本次检查更新时间和下次检查更新时间等信息。如果我们手动将这些时间点修改为2099年，就可以长期暂停Windows的更新，而且不会影响到Microsoft Store、Xbox游戏等功能的使用。</p>
+<h3>方法一：手搓</h3>
+<p>使用注册表编辑器<br>
+按 Win + R 键，输入 regedit 并按回车键，打开注册表编辑器。<br>
+导航到 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings 路径。<br>
+找到或新建 PauseUpdatesStartTime 和 PauseUpdatesExpiryTime 两个字符串值。<br>
+双击它们，将值数据分别修改为 2025-10-14T11:00:30Z 和 2099-12-31T23:59:59Z。<br>
+关闭注册表编辑器。</p>
+<h3>方法二：创建批处理程序</h3>
+<p>复制以下带代码并将其另存为 <strong>.bat</strong> 结尾的批处理脚本。<br>
+请注意：在保存bat文件时，保存类型选择"所有文档"，编码选择 <strong>"ANSI"</strong> ，否则运行后会显示乱码。</p>
 <pre class="notranslate"><code class="notranslate">@echo off
 MODE con: COLS=90 LINES=28
 title Loading
@@ -164,7 +174,6 @@ echo.
 echo.  操作完成，按任意键返回！
 pause&gt;nul
 </code></pre>
-<hr>
 <p>source <a href="https://www.zifumao.com/3769.html" rel="nofollow">https://www.zifumao.com/3769.html</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

@@ -27,7 +27,6 @@ sudo iptables -t nat -L -v
 ```
 iptables -t nat -F
 ```
-***
 ## 拓展 删除特定NAT规则
 查看规则列表及编号
 ```
@@ -38,7 +37,7 @@ iptables -t nat -L --line-numbers
 ```
 iptables -t nat -D POSTROUTING 7 
 ```
+参考
 ---
-参考：
 [Proxy | Hysteria 2 端口跳跃](https://blog.jianbing.tk/p/hy2-port-hopping/)
 https://hysteria.network/zh/docs/advanced/Port-Hopping/

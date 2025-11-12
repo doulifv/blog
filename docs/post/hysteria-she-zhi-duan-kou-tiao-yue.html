@@ -112,7 +112,6 @@ sudo apt install iptables-persistent
 <p>删除全部iptables nat规则，使用 -F 选项可以删除nat表中所有链中的所有规则。</p>
 <pre class="notranslate"><code class="notranslate">iptables -t nat -F
 </code></pre>
-<hr>
 <h2>拓展 删除特定NAT规则</h2>
 <p>查看规则列表及编号</p>
 <pre class="notranslate"><code class="notranslate">iptables -t nat -L --line-numbers
@@ -121,9 +120,8 @@ sudo apt install iptables-persistent
 删除 POSTROUTING 链中的第 7 条规则</p>
 <pre class="notranslate"><code class="notranslate">iptables -t nat -D POSTROUTING 7 
 </code></pre>
-<hr>
-<p>参考：<br>
-<a href="https://blog.jianbing.tk/p/hy2-port-hopping/" rel="nofollow">Proxy | Hysteria 2 端口跳跃</a><br>
+<h2>参考</h2>
+<p><a href="https://blog.jianbing.tk/p/hy2-port-hopping/" rel="nofollow">Proxy | Hysteria 2 端口跳跃</a><br>
 <a href="https://hysteria.network/zh/docs/advanced/Port-Hopping/" rel="nofollow">https://hysteria.network/zh/docs/advanced/Port-Hopping/</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 

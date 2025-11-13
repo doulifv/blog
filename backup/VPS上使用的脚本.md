@@ -13,7 +13,7 @@ bash <(curl -sL Net.Check.Place)
 ```
 bash <(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
 ```
-设置变量ip=192.168.1.2适用于申请ssl证书与本地ip不一致的情况
+设置变量ip=192.168.1.2适用于申请ssl证书套了warp出口ip与本地ip不一致的情况
 ```
 export ip=192.168.1.2
 ```

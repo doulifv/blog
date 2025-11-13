@@ -25,7 +25,18 @@ bash <(curl -sL Net.Check.Place)
 ```
 bash <(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
 ```
-
+设置变量ip=192.168.1.2适用于申请ssl证书与本地ip不一致的情况
+```
+export ip=192.168.1.2
+```
+http代理
+```
+export http_proxy=http://192.168.1.2:12334
+```
+socks5代理
+```
+export http_proxy='socks5://127.0.0.1:1080'
+```
 **more writing...is soon**。">
 <meta property="og:title" content="VPS上使用的脚本">
 <meta property="og:description" content="查看IP信息
@@ -43,7 +54,18 @@ bash <(curl -sL Net.Check.Place)
 ```
 bash <(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
 ```
-
+设置变量ip=192.168.1.2适用于申请ssl证书与本地ip不一致的情况
+```
+export ip=192.168.1.2
+```
+http代理
+```
+export http_proxy=http://192.168.1.2:12334
+```
+socks5代理
+```
+export http_proxy='socks5://127.0.0.1:1080'
+```
 **more writing...is soon**。">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://doulifv.github.io/blog/post/VPS-shang-shi-yong-de-jiao-ben.html">
@@ -119,6 +141,15 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </code></pre>
 <p>233boy sing-box一键脚本</p>
 <pre class="notranslate"><code class="notranslate">bash &lt;(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
+</code></pre>
+<p>设置变量ip=192.168.1.2适用于申请ssl证书与本地ip不一致的情况</p>
+<pre class="notranslate"><code class="notranslate">export ip=192.168.1.2
+</code></pre>
+<p>http代理</p>
+<pre class="notranslate"><code class="notranslate">export http_proxy=http://192.168.1.2:12334
+</code></pre>
+<p>socks5代理</p>
+<pre class="notranslate"><code class="notranslate">export http_proxy="socks5://127.0.0.1:1080"
 </code></pre>
 <p><strong>more writing...is soon</strong></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>

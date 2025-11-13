@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Tue, 11 Nov 2025 02:46:06 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>一键禁用windows10/11系统自动更新至2099年</title><link>https://doulifv.github.io/blog/post/yi-jian-jin-yong-windows10-11-xi-tong-zi-dong-geng-xin-zhi-2099-nian.html</link><description>### 说明：实现原理
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Thu, 13 Nov 2025 01:48:57 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>一键禁用windows10/11系统自动更新至2099年</title><link>https://doulifv.github.io/blog/post/yi-jian-jin-yong-windows10-11-xi-tong-zi-dong-geng-xin-zhi-2099-nian.html</link><description>### 说明：实现原理
 实现这个方法的原理很简单。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/yi-jian-jin-yong-windows10-11-xi-tong-zi-dong-geng-xin-zhi-2099-nian.html</guid><pubDate>Tue, 11 Nov 2025 02:37:58 +0000</pubDate></item><item><title>hysteria设置端口跳跃</title><link>https://doulifv.github.io/blog/post/hysteria-she-zhi-duan-kou-tiao-yue.html</link><description>## 安装 iptables-persistent
 ```
 sudo apt update
@@ -1527,7 +1527,18 @@ bash &lt;(curl -sL Net.Check.Place)
 ```
 bash &lt;(wget -qO- -o- https://github.com/233boy/sing-box/raw/main/install.sh)
 ```
-
+设置变量ip=192.168.1.2适用于申请ssl证书与本地ip不一致的情况
+```
+export ip=192.168.1.2
+```
+http代理
+```
+export http_proxy=http://192.168.1.2:12334
+```
+socks5代理
+```
+export http_proxy='socks5://127.0.0.1:1080'
+```
 **more writing...is soon**。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/VPS-shang-shi-yong-de-jiao-ben.html</guid><pubDate>Sat, 18 Oct 2025 01:58:35 +0000</pubDate></item><item><title>2053端口弱密码扫描</title><link>https://doulifv.github.io/blog/post/2053-duan-kou-ruo-mi-ma-sao-miao.html</link><description>```
 #!/bin/bash
 #echo 'IP range:'

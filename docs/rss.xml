@@ -1,5 +1,39 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 14 Nov 2025 00:14:14 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>飞鼠说明书备份</title><link>https://doulifv.github.io/blog/post/fei-shu-shuo-ming-shu-bei-fen.html</link><description>几个月不用飞鼠，使用方法给忘记了，马上去抖音找了下才知道怎么用
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 14 Nov 2025 07:20:54 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>autounlock.bat</title><link>https://doulifv.github.io/blog/post/autounlock.bat.html</link><description>```
+@echo off
+setlocal enabledelayedexpansion
+
+:: 设置要监控的目录（当前目录）
+set 'watch_dir=H:\auto\file'
+
+:: 设置要执行的程序
+set 'target_exe=H:\auto\et.exe'
+
+:: 初始化文件列表
+dir /b /a-d '%watch_dir%' &gt; oldfiles.tmp 2&gt;nul
+
+:loop
+:: 使用ping命令实现2秒等待（ping 本机5次，每次间隔1秒，共约5秒）
+ping -n 5 127.0.0.1 &gt; nul
+
+:: 获取当前文件列表
+dir /b /a-d '%watch_dir%' &gt; newfiles.tmp 2&gt;nul
+
+:: 比较文件差异
+fc /b oldfiles.tmp newfiles.tmp &gt;nul
+if %errorlevel% equ 1 (
+    echo 检测到新文件，正在执行 %target_exe% ...
+    
+    :: 启动程序并发送回车键
+    start '' /wait cmd /c echo. | '%target_exe%'
+    
+    echo 程序执行完成，继续监控...
+)
+
+:: 更新文件列表
+move /y newfiles.tmp oldfiles.tmp &gt;nul
+goto loop
+```。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/autounlock.bat.html</guid><pubDate>Fri, 14 Nov 2025 07:20:16 +0000</pubDate></item><item><title>飞鼠说明书备份</title><link>https://doulifv.github.io/blog/post/fei-shu-shuo-ming-shu-bei-fen.html</link><description>几个月不用飞鼠，使用方法给忘记了，马上去抖音找了下才知道怎么用
 &lt;img width='415' height='498' alt='Image' src='https://github.com/user-attachments/assets/c8faa0c8-941c-4019-8127-cbb0c661d423' /&gt;
 &lt;img width='28' height='498' alt='Image' src='https://github.com/user-attachments/assets/510d251a-3c91-4e43-b625-346ad8fa8433' /&gt;。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/fei-shu-shuo-ming-shu-bei-fen.html</guid><pubDate>Thu, 13 Nov 2025 14:25:17 +0000</pubDate></item><item><title>一键禁用windows10/11系统自动更新至2099年</title><link>https://doulifv.github.io/blog/post/yi-jian-jin-yong-windows10-11-xi-tong-zi-dong-geng-xin-zhi-2099-nian.html</link><description>### 说明：实现原理
 实现这个方法的原理很简单。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/yi-jian-jin-yong-windows10-11-xi-tong-zi-dong-geng-xin-zhi-2099-nian.html</guid><pubDate>Tue, 11 Nov 2025 02:37:58 +0000</pubDate></item><item><title>hysteria设置端口跳跃</title><link>https://doulifv.github.io/blog/post/hysteria-she-zhi-duan-kou-tiao-yue.html</link><description>## 安装 iptables-persistent

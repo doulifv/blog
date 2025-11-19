@@ -1,4 +1,4 @@
-## Install on Linux / MacOS   在Linux / MacOS上安装
+## Install on Linux or MacOS   在Linux或MacOS系统上安装
 To install Stalwart on Linux or MacOS, execute the following command in your terminal:
 要在 Linux 或 MacOS 上安装 Stalwart，请在终端执行以下命令：
 ```
@@ -15,12 +15,17 @@ If you are planning to use FoundationDB as the backend, add the --fdb parameter 
 
 ## Log in to the web interface 登录网页界面
 Once the installation is complete, the installation script will print out the administrator account and password:
-安装完成后，安装脚本会打印管理员账户和密码：
+安装完成后，安装脚本会在终端显示管理员账户和密码：
 ```
 sudo sh install.sh
+⏳ Downloading stalwart for x86_64-unknown-linux-gnu...
+stalwart
 ✅ Configuration file written to /opt/stalwart/etc/config.toml
-🔑 Your administrator account is 'admin' with password 'w95Yuiu36E'.
-🎉 Installation complete! Continue the setup at http://yourserver.org:8080/login
+🔑 Your administrator account is 'admin' with password 'aHgAUnkwwY'.
+🔐 Setting permissions...
+🚀 Starting service...
+🎉 Installation complete! Continue the setup at http://localhost:8080/login
+
 ```
 
 ### 卸载
@@ -30,11 +35,11 @@ sudo sh install.sh
 systemctl stop stalwart
 systemctl disable stalwart
 ```
-删除安装目录
+删除安装目录及文件
 ```
 rm -rf /opt/stalwart
 ```
-删除 systemd 服务文件
+删除 systemd 服务配置文件
 ```
 rm /etc/systemd/system/stalwart.service
 ```

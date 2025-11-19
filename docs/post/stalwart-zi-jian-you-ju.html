@@ -10,7 +10,7 @@
         let theme = localStorage.getItem("meek_theme") || "light";
         document.documentElement.setAttribute("data-color-mode", theme);
     </script>
-<meta name="description" content="## Install on Linux / MacOS   在Linux / MacOS上安装
+<meta name="description" content="## Install on Linux or MacOS   在Linux或MacOS系统上安装
 To install Stalwart on Linux or MacOS, execute the following command in your terminal:
 要在 Linux 或 MacOS 上安装 Stalwart，请在终端执行以下命令：
 ```
@@ -19,7 +19,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://get.stalw.art/install.sh -o install
 Then, execute the installation script as root. The default installation directory is /opt/stalwart. If you want to install Stalwart in a different directory, you can specify the installation directory as an argument:
 然后，以root身份执行安装脚本。">
 <meta property="og:title" content="stalwart自建邮局">
-<meta property="og:description" content="## Install on Linux / MacOS   在Linux / MacOS上安装
+<meta property="og:description" content="## Install on Linux or MacOS   在Linux或MacOS系统上安装
 To install Stalwart on Linux or MacOS, execute the following command in your terminal:
 要在 Linux 或 MacOS 上安装 Stalwart，请在终端执行以下命令：
 ```
@@ -91,7 +91,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 </div>
 </div>
     <div id="content">
-<div class="markdown-body" id="postBody"><h2>Install on Linux / MacOS   在Linux / MacOS上安装</h2>
+<div class="markdown-body" id="postBody"><h2>Install on Linux or MacOS   在Linux或MacOS系统上安装</h2>
 <p>To install Stalwart on Linux or MacOS, execute the following command in your terminal:<br>
 要在 Linux 或 MacOS 上安装 Stalwart，请在终端执行以下命令：</p>
 <pre class="notranslate"><code class="notranslate">curl --proto '=https' --tlsv1.2 -sSf https://get.stalw.art/install.sh -o install.sh
@@ -104,11 +104,16 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 如果你打算用 FoundationDB 作为后端，可以在安装脚本中添加 --fdb 参数，下载支持 FoundationDB 的版本。</p>
 <h2>Log in to the web interface 登录网页界面</h2>
 <p>Once the installation is complete, the installation script will print out the administrator account and password:<br>
-安装完成后，安装脚本会打印管理员账户和密码：</p>
+安装完成后，安装脚本会在终端显示管理员账户和密码：</p>
 <pre class="notranslate"><code class="notranslate">sudo sh install.sh
+⏳ Downloading stalwart for x86_64-unknown-linux-gnu...
+stalwart
 ✅ Configuration file written to /opt/stalwart/etc/config.toml
-🔑 Your administrator account is 'admin' with password 'w95Yuiu36E'.
-🎉 Installation complete! Continue the setup at http://yourserver.org:8080/login
+🔑 Your administrator account is 'admin' with password 'aHgAUnkwwY'.
+🔐 Setting permissions...
+🚀 Starting service...
+🎉 Installation complete! Continue the setup at http://localhost:8080/login
+
 </code></pre>
 <h3>卸载</h3>
 <p>如果使用脚本默认安装到 /opt/stalwart目录, 可以使用以下步骤彻底卸载:<br>
@@ -116,10 +121,10 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <pre class="notranslate"><code class="notranslate">systemctl stop stalwart
 systemctl disable stalwart
 </code></pre>
-<p>删除安装目录</p>
+<p>删除安装目录及文件</p>
 <pre class="notranslate"><code class="notranslate">rm -rf /opt/stalwart
 </code></pre>
-<p>删除 systemd 服务文件</p>
+<p>删除 systemd 服务配置文件</p>
 <pre class="notranslate"><code class="notranslate">rm /etc/systemd/system/stalwart.service
 </code></pre>
 <p>重新加载 systemd 配置</p>

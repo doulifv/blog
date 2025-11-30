@@ -1,5 +1,59 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Wed, 19 Nov 2025 10:08:55 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>stalwart自建邮局</title><link>https://doulifv.github.io/blog/post/stalwart-zi-jian-you-ju.html</link><description>## Install on Linux or MacOS   在Linux或MacOS系统上安装
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sun, 30 Nov 2025 13:29:24 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>Linux安装qbittorrent-nox 5.1.0-2</title><link>https://doulifv.github.io/blog/post/Linux-an-zhuang-qbittorrent-nox%205.1.0-2.html</link><description>## 更新/安装/查看日志
+```
+sudo apt update
+sudo apt install qbittorrent-nox
+journalctl -fu qbittorrent-nox
+```
+&gt;******** Information ********
+&gt;Nov 29 23:25:30 localhost qbittorrent-nox[145969]: To control qBittorrent, access the WebUI at: http://&gt;localhost:8000
+&gt;Nov 29 23:25:30 localhost qbittorrent-nox[145969]: The WebUI administrator username is: **admin**
+&gt;Nov 29 23:25:30 localhost qbittorrent-nox[145969]: The WebUI administrator password was not set. A &gt;temporary password is provided for this session: **HH67hgg6**
+&gt;Nov 29 23:25:30 localhost qbittorrent-nox[145969]: You should set your own password in program &gt;preferences.
+## 不知道密码?
+如果没有见到密码输出，可以手动修改配置文件
+```
+vi /etc/systemd/system/qbittorrent-nox.service
+```
+添加WorkingDirectory
+```
+[Unit]
+Description=qBittorrent Command Line Client
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+UMask=007
+WorkingDirectory=/root/.config/qBittorrent
+ExecStart=/usr/bin/qbittorrent-nox --webui-port=8080
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+编辑配置文件
+```
+vi ~/.config/qBittorrent/qBittorrent.conf
+```
+添加以下内容
+```
+[Preferences]
+WebUI\User=admin
+WebUI\Password_PBKDF2='@ByteArray(ARQ77eY1NUZaQsuDHbIMCA==:0WMRkYTUWVT9wVvdDtHAjU9b3b7uB8NR1Gur2hmQCvCDpm39Q+PsJRJPaCU51dEiz+dTzh8qbPsL8WkFljQYFQ==)'
+```
+重载/重启服务
+```
+systemctl stop qbittorrent-nox
+systemctl daemon-reload
+systemctl start qbittorrent-nox
+```
+账户admin 
+密码adminadmin
+
+参考
+[apt安装最新版qbittorrent-nox 5.0.1，并修改密码](https://www.thsink.com/notes/1842/)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/Linux-an-zhuang-qbittorrent-nox%205.1.0-2.html</guid><pubDate>Sun, 30 Nov 2025 13:21:47 +0000</pubDate></item><item><title>stalwart自建邮局</title><link>https://doulifv.github.io/blog/post/stalwart-zi-jian-you-ju.html</link><description>## Install on Linux or MacOS   在Linux或MacOS系统上安装
 To install Stalwart on Linux or MacOS, execute the following command in your terminal:
 要在 Linux 或 MacOS 上安装 Stalwart，请在终端执行以下命令：
 ```

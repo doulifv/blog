@@ -1,5 +1,43 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 13 Dec 2025 03:30:57 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>linux开启流量转发</title><link>https://doulifv.github.io/blog/post/linux-kai-qi-liu-liang-zhuan-fa.html</link><description>### 启用 IP 转发 (Kernel Level)
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Tue, 16 Dec 2025 00:06:40 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>alpine下docker换源操作</title><link>https://doulifv.github.io/blog/post/alpine-xia-docker-huan-yuan-cao-zuo.html</link><description>创建/修改daemon.json文件
+```
+vi /etc/docker/daemon.json
+```
+编辑
+```
+{
+  'registry-mirrors': ['https://mirror.ccs.tencentyun.com', 'https://hub-mirror.c.163.com']
+}
+```
+重启验证
+```
+rc-service docker stop
+rc-service docker start
+docker info
+docker pull hello-world
+```。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/alpine-xia-docker-huan-yuan-cao-zuo.html</guid><pubDate>Mon, 15 Dec 2025 13:23:28 +0000</pubDate></item><item><title>alpine安装docker</title><link>https://doulifv.github.io/blog/post/alpine-an-zhuang-docker.html</link><description>```
+vi /etc/apk/repositories
+```
+&gt;#http://mirrors.aliyun.com/alpine/v3.21/community
+&gt;取消community源的注释
+```
+apk update
+apk add docker
+```
+添加开机自启动、启动docker服务
+```
+rc-update add docker boot
+service docker start
+```
+&gt; alpine:~# rc-update add docker boot
+&gt;   * service docker added to runlevel boot
+&gt;alpine:~# service docker start
+&gt;   * Caching service dependencies ...                                                         [ ok ]
+&gt;   * /var/log/docker.log: creating file
+&gt;   * /var/log/docker.log: correcting owner
+&gt;   * Starting Docker Daemon ...                                                               [ ok  ]
+&gt; alpine:~# docker -v
+&gt;Docker version 27.3.1。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/alpine-an-zhuang-docker.html</guid><pubDate>Mon, 15 Dec 2025 03:32:01 +0000</pubDate></item><item><title>linux开启流量转发</title><link>https://doulifv.github.io/blog/post/linux-kai-qi-liu-liang-zhuan-fa.html</link><description>### 启用 IP 转发 (Kernel Level)
 #### 1.编辑 sysctl 配置文件
 ```
 vi /etc/sysctl.conf

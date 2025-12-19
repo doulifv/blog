@@ -81,7 +81,7 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <pre class="notranslate"><code class="notranslate">apt install apt-transport-https ca-certificates
 </code></pre>
 <p>Debian11</p>
-<pre class="notranslate"><code class="notranslate">/etc/apt/sources.list
+<pre class="notranslate"><code class="notranslate">vi /etc/apt/sources.list
 </code></pre>
 <ul class="contains-task-list">
 <li class="task-list-item"><input type="checkbox" id="" disabled="" class="task-list-item-checkbox" aria-label="Completed task" checked=""> 启用源码源</li>
@@ -89,18 +89,18 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <li class="task-list-item"><input type="checkbox" id="" disabled="" class="task-list-item-checkbox" aria-label="Completed task" checked=""> 强制安全更新使用镜像</li>
 </ul>
 <pre class="notranslate"><code class="notranslate"># 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib non-free
-deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye main contrib non-free
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie main contrib non-free non-free-firmware
 
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-updates main contrib non-free
-deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-updates main contrib non-free
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie-updates main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie-updates main contrib non-free non-free-firmware
 
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-backports main contrib non-free
-deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ bullseye-backports main contrib non-free
+deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie-backports main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie-backports main contrib non-free non-free-firmware
 
 # 以下安全更新软件源包含了官方源与镜像站配置，如有需要可自行修改注释切换
-deb https://security.debian.org/debian-security bullseye-security main contrib non-free
-deb-src https://security.debian.org/debian-security bullseye-security main contrib non-free
+deb https://mirrors.tuna.tsinghua.edu.cn/debian-security trixie-security main contrib non-free non-free-firmware
+deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security trixie-security main contrib non-free non-free-firmware
 </code></pre>
 <p><a href="https://mirrors.tuna.tsinghua.edu.cn/help/debian/" rel="nofollow"> 清华大学开源软件镜像站</a></p></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>

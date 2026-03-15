@@ -9,7 +9,7 @@
 |puresys 纯净系统  软件下载 | https://www.puresys.net/|
 |549.tv|http://549.tv|
 ---
-| LINK | NOTE |
+| NOTE| LINK |
 | ----------- | ----------- |
 | 奇客资讯网 | https://www.solidot.org/ |
 |lowendtalk|https://lowendtalk.com|

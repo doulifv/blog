@@ -1,3 +1,4 @@
+纯个人收藏
 | LINK | NOTE |
 | ----------- | ----------- |
 |[Zapro Notice](https://tmioe.com/) | 🔥软件 电影  纪录片 [zaproshare](https://t.me/zaproshare)|
@@ -6,4 +7,9 @@
 |[Nite的小窝](https://www.nite07.com)| 博客: https://www.nite07.com  软件站: https://software.nite07.com  游戏站: https://game.nite07.com  Vaultwarden: https://passwd.nite07.com [TGChannel](https://t.me/nitechan) |
 |[胖虎の收藏夹](https://t.me/gitbig)|乜都有|
 |puresys 纯净系统  软件下载 | https://www.puresys.net/|
+|549.tv|http://549.tv|
 ---
+| LINK | NOTE |
+| ----------- | ----------- |
+| 奇客资讯网 | https://www.solidot.org/ |
+|lowendtalk|https://lowendtalk.com|

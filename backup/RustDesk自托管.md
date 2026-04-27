@@ -1,2 +1,0 @@
-[https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/install/](https://rustdesk.com/docs/en/self-host/rustdesk-server-oss/install/)
-[https://www.cnblogs.com/ryanyangcs/p/18186163](https://www.cnblogs.com/ryanyangcs/p/18186163)

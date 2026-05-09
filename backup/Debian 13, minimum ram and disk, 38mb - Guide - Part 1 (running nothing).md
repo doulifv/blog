@@ -1,1 +1,0 @@
-https://lowendspirit.com/discussion/10684/debian-13-minimum-ram-and-disk-38mb-guide-part-1-running-nothing

@@ -1,0 +1,2 @@
+https://lowendspirit.com/discussion/10684/debian-13-minimum-ram-and-disk-38mb-guide-part-1-running-nothing
+https://lowendspirit.com/discussion/10687/debian-13-minimum-ram-and-disk-38mb-guide-part-2-running-wordpress

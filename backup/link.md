@@ -8,6 +8,7 @@
 |[胖虎の收藏夹](https://t.me/gitbig)|乜都有|
 |puresys 纯净系统  软件下载 | https://www.puresys.net/|
 |549.tv|http://549.tv|
+|zapro|https://tmioe.com/|
 ---
 | NOTE| LINK |
 | ----------- | ----------- |

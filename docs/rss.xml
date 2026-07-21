@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Fri, 17 Jul 2026 07:26:56 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>不同操作系统计算本地文件MD5计算</title><link>https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</link><description>不同操作系统计算本地文件MD5值的具体方法如下。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</guid><pubDate>Tue, 14 Jul 2026 01:09:24 +0000</pubDate></item><item><title>Windows 系统 WinSxS 安全清理指南</title><link>https://doulifv.github.io/blog/post/Windows%20-xi-tong-%20WinSxS%20-an-quan-qing-li-zhi-nan.html</link><description>### 严禁手动删除 WinSxS 内部任何文件 / 文件夹
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Tue, 21 Jul 2026 06:35:38 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>不同操作系统计算本地文件MD5计算</title><link>https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</link><description>不同操作系统计算本地文件MD5值的具体方法如下。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</guid><pubDate>Tue, 14 Jul 2026 01:09:24 +0000</pubDate></item><item><title>Windows 系统 WinSxS 安全清理指南</title><link>https://doulifv.github.io/blog/post/Windows%20-xi-tong-%20WinSxS%20-an-quan-qing-li-zhi-nan.html</link><description>### 严禁手动删除 WinSxS 内部任何文件 / 文件夹
 ### 如果你是Windows 10系统
 #### 常规深度清理（可卸载更新）
 ```
@@ -3050,6 +3050,7 @@ Repeat this process for the rest of the CDs in your set.
 |puresys 纯净系统  软件下载 | https://www.puresys.net/|
 |549.tv|http://549.tv|
 |zapro|https://tmioe.com/|
+|DownLoadLy.iR|https://DownLoadLy.iR|
 ---
 | NOTE| LINK |
 | ----------- | ----------- |

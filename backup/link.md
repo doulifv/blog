@@ -9,6 +9,7 @@
 |puresys 纯净系统  软件下载 | https://www.puresys.net/|
 |549.tv|http://549.tv|
 |zapro|https://tmioe.com/|
+|DownLoadLy.iR|https://DownLoadLy.iR|
 ---
 | NOTE| LINK |
 | ----------- | ----------- |

@@ -1,5 +1,222 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Tue, 21 Jul 2026 06:35:38 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>不同操作系统计算本地文件MD5计算</title><link>https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</link><description>不同操作系统计算本地文件MD5值的具体方法如下。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</guid><pubDate>Tue, 14 Jul 2026 01:09:24 +0000</pubDate></item><item><title>Windows 系统 WinSxS 安全清理指南</title><link>https://doulifv.github.io/blog/post/Windows%20-xi-tong-%20WinSxS%20-an-quan-qing-li-zhi-nan.html</link><description>### 严禁手动删除 WinSxS 内部任何文件 / 文件夹
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Wed, 05 Aug 2026 13:02:44 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>证件照转换小工具</title><link>https://doulifv.github.io/blog/post/zheng-jian-zhao-zhuan-huan-xiao-gong-ju.html</link><description>```
+&lt;!DOCTYPE html&gt;
+&lt;html lang='zh-CN'&gt;
+&lt;head&gt;
+    &lt;meta charset='UTF-8'&gt;
+    &lt;meta name='viewport' content='width=device-width, initial-scale=1.0'&gt;
+    &lt;title&gt;证件照尺寸生成器&lt;/title&gt;
+    &lt;style&gt;
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+        body {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 16px;
+            background-color: #f4f7fa;
+        }
+        .container {
+            background: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px #00000015;
+        }
+        .row {
+            display: flex;
+            gap:20px;
+            flex-wrap: wrap;
+        }
+        .col-left{
+            flex:1;
+            min-width:280px;
+        }
+        .col-right{
+            flex:1;
+            min-width:280px;
+        }
+        .form-item{
+            margin:14px 0;
+        }
+        label{
+            display:block;
+            margin-bottom:6px;
+            font-weight:500;
+        }
+        select, button, input[type='file']{
+            width:100%;
+            padding:10px;
+            font-size:15px;
+            border:1px solid #ccc;
+            border-radius:6px;
+        }
+        button{
+            background:#2563eb;
+            color:white;
+            border:none;
+            cursor:pointer;
+            margin-top:8px;
+        }
+        button:hover{
+            background:#1d4ed8;
+        }
+        #previewWrap{
+            border:1px solid #ddd;
+            padding:16px;
+            background:#eee;
+            min-height:300px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        canvas{
+            max-width:100%;
+        }
+        .size-desc{
+            font-size:13px;
+            color:#555;
+            margin-top:4px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class='container'&gt;
+    &lt;h2&gt;证件照生成器（本地浏览器）&lt;/h2&gt;
+    &lt;div class='row'&gt;
+        &lt;div class='col-left'&gt;
+            &lt;div class='form-item'&gt;
+                &lt;label&gt;上传人像照片&lt;/label&gt;
+                &lt;input type='file' id='fileInput' accept='image/*'&gt;
+            &lt;/div&gt;
+            &lt;div class='form-item'&gt;
+                &lt;label&gt;选择证件照尺寸&lt;/label&gt;
+                &lt;select id='sizeSelect'&gt;
+                    &lt;option value='big1'&gt;大一寸 33×48mm（港澳通行证/护照常用）&lt;/option&gt;
+                    &lt;option value='small1'&gt;小一寸 22×32mm&lt;/option&gt;
+                    &lt;option value='inch1'&gt;一寸 25×35mm&lt;/option&gt;
+                    &lt;option value='small2'&gt;小二寸 35×45mm&lt;/option&gt;
+                    &lt;option value='inch2'&gt;二寸 35×49mm&lt;/option&gt;
+                &lt;/select&gt;
+                &lt;div class='size-desc' id='sizeTip'&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class='form-item'&gt;
+                &lt;label&gt;DPI (打印建议300)&lt;/label&gt;
+                &lt;input type='number' id='dpiInput' value='300'&gt;
+            &lt;/div&gt;
+            &lt;button id='genBtn'&gt;生成证件照预览&lt;/button&gt;
+            &lt;button id='downloadBtn'&gt;下载图片&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class='col-right'&gt;
+            &lt;div id='previewWrap'&gt;
+                &lt;span&gt;请上传图片并点击生成&lt;/span&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// 尺寸定义 mm : [宽mm,高mm,备注]
+const sizeMap = {
+    big1:    [33, 48, '大一寸 33×48mm'],
+    small1:  [22, 32, '小一寸 22×32mm'],
+    inch1:   [25, 35, '一寸 25×35mm'],
+    small2:  [35, 45, '小二寸 35×45mm'],
+    inch2:   [35, 49, '二寸 35×49mm']
+};
+
+const fileInput = document.getElementById('fileInput');
+const sizeSelect = document.getElementById('sizeSelect');
+const dpiInput = document.getElementById('dpiInput');
+const genBtn = document.getElementById('genBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const previewWrap = document.getElementById('previewWrap');
+const sizeTip = document.getElementById('sizeTip');
+
+let sourceImg = null;
+let resultCanvas = null;
+
+sizeSelect.addEventListener('change', ()=&gt;{
+    const key = sizeSelect.value;
+    const [w,h,tip] = sizeMap[key];
+    sizeTip.innerText = `${tip}，宽${w}mm，高${h}mm`;
+})
+sizeSelect.dispatchEvent(new Event('change'));
+
+fileInput.addEventListener('change', (e)=&gt;{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev=&gt;{
+        const img = new Image();
+        img.onload = ()=&gt;{
+            sourceImg = img;
+        }
+        img.src = ev.target.result;
+    }
+    reader.readAsDataURL(file);
+})
+
+genBtn.onclick = function(){
+    if(!sourceImg){
+        alert('请先上传照片');
+        return;
+    }
+    const key = sizeSelect.value;
+    const [mmW, mmH] = sizeMap[key];
+    const dpi = Number(dpiInput.value) || 300;
+
+    // mm转像素: 1英寸=25.4mm
+    const pxW = Math.round(mmW / 25.4 * dpi);
+    const pxH = Math.round(mmH / 25.4 * dpi);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = pxW;
+    canvas.height = pxH;
+    const ctx = canvas.getContext('2d');
+
+    // 居中裁剪，按证件照比例截取原图中间部分
+    const imgRatio = sourceImg.width / sourceImg.height;
+    const targetRatio = pxW / pxH;
+
+    let sx, sy, sWidth, sHeight;
+    if(imgRatio &gt; targetRatio){
+        // 原图更宽，左右裁
+        sHeight = sourceImg.height;
+        sWidth = sourceImg.height * targetRatio;
+        sx = (sourceImg.width - sWidth)/2;
+        sy = 0;
+    }else{
+        // 原图更高，上下裁
+        sWidth = sourceImg.width;
+        sHeight = sourceImg.width / targetRatio;
+        sx = 0;
+        sy = (sourceImg.height - sHeight)/2;
+    }
+    ctx.drawImage(sourceImg, sx, sy, sWidth, sHeight, 0,0, pxW, pxH);
+
+    // 渲染预览
+    previewWrap.innerHTML = '';
+    previewWrap.appendChild(canvas);
+    resultCanvas = canvas;
+}
+
+downloadBtn.onclick = function(){
+    if(!resultCanvas){
+        alert('请先生成预览');
+        return;
+    }
+    const key = sizeSelect.value;
+    const name = `${sizeMap[key][2]}.png`;
+    const link = document.createElement('a');
+    link.download = name;
+    link.href = resultCanvas.toDataURL('image/png');
+    link.click();
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+```。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/zheng-jian-zhao-zhuan-huan-xiao-gong-ju.html</guid><pubDate>Wed, 05 Aug 2026 13:01:44 +0000</pubDate></item><item><title>不同操作系统计算本地文件MD5计算</title><link>https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</link><description>不同操作系统计算本地文件MD5值的具体方法如下。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/bu-tong-cao-zuo-xi-tong-ji-suan-ben-di-wen-jian-MD5-ji-suan.html</guid><pubDate>Tue, 14 Jul 2026 01:09:24 +0000</pubDate></item><item><title>Windows 系统 WinSxS 安全清理指南</title><link>https://doulifv.github.io/blog/post/Windows%20-xi-tong-%20WinSxS%20-an-quan-qing-li-zhi-nan.html</link><description>### 严禁手动删除 WinSxS 内部任何文件 / 文件夹
 ### 如果你是Windows 10系统
 #### 常规深度清理（可卸载更新）
 ```

@@ -10,8 +10,11 @@
 |549.tv|http://549.tv|
 |zapro|https://tmioe.com/|
 |DownLoadLy.iR|https://DownLoadLy.iR|
+|8度软件|https://baduwangzhan.com/|
+|利爪|https://lizhua.ysepan.com/|
 ---
 | NOTE| LINK |
 | ----------- | ----------- |
 | 奇客资讯网 | https://www.solidot.org/ |
 |lowendtalk|https://lowendtalk.com|
+|rjawei|https://www.rjawei.vip/|

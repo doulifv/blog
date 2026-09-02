@@ -1,5 +1,40 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Wed, 19 Aug 2026 14:39:53 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>证件照转换小工具</title><link>https://doulifv.github.io/blog/post/zheng-jian-zhao-zhuan-huan-xiao-gong-ju.html</link><description>```
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Wed, 02 Sep 2026 02:28:51 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>OmniBox</title><link>https://doulifv.github.io/blog/post/OmniBox.html</link><description>### 安装部署
+#### 1、创建本地文件夹映射
+```
+ mkdir -p /opt/omnibox/data
+ cd /opt/omnibox
+```
+#### 2、Docker Compose配置方式
+```
+ services:
+   omnibox:
+     image: lampon/omnibox:latest
+     container_name: omnibox
+     ports:
+       - '7023:7023'
+     restart: unless-stopped
+     volumes:
+       - ./data:/app/data
+```
+#### 3、Docker命令行方式
+```
+ docker pull lampon/omnibox:latest
+```
+##### Docker命令
+```
+ docker run -d \
+    --restart unless-stopped \
+    --name omnibox \
+    -p 7023:7023 \
+    -v $PWD/data:/app/data \
+    lampon/omnibox:latest
+```
+#### 登录管理地址
+ **http://NAS_IP:7023/admin**
+---
+参阅
+[OmniBox-一个好用的影视聚合平台,Docker一键部署和使用教程-知乎](https://zhuanlan.zhihu.com/p/2003806837204604477)。</description><guid isPermaLink="true">https://doulifv.github.io/blog/post/OmniBox.html</guid><pubDate>Wed, 02 Sep 2026 02:28:23 +0000</pubDate></item><item><title>证件照转换小工具</title><link>https://doulifv.github.io/blog/post/zheng-jian-zhao-zhuan-huan-xiao-gong-ju.html</link><description>```
 &lt;!DOCTYPE html&gt;
 &lt;html lang='zh-CN'&gt;
 &lt;head&gt;

@@ -34,3 +34,4 @@
 ---
 参阅
 [OmniBox-一个好用的影视聚合平台,Docker一键部署和使用教程-知乎](https://zhuanlan.zhihu.com/p/2003806837204604477)
+https://club.ugnas.com/thread-1712-1-1.html

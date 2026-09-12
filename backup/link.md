@@ -20,17 +20,18 @@
 |rjawei|https://www.rjawei.vip/|
 ---
 影视资源
-| 编码 | 名称 | 类型 | 链接
-| -- | -- | -- | -- |
-1 | 茶杯狐（Cupfox） | 影视资源聚合搜索引擎 | https://cupfox.love/
-2 | 厂长资源 | 高清影视聚合站 | https://cz01.vip https://www.4kcz.com/ https://czzy.top/
-3 | LIBVIO | 免费高清影视聚合站 | https://libvio.lol
-4 | 555电影/555影视 | 老牌影视资源聚合站 | https://www.555zxdy.cc/
-5 | 低调影视 | 影视内容聚合平台 | https://ddys.app
-6 | 奈飞工厂 | 主打Netflix内容盗播 | https://www.netflixgc.com/
-7 | 电影天堂 | 老牌影视资源分享站 | https://www.dytt8899.com/ http://www.dy2018.com/
-8 | 麦田影院 | 聚合影视网站 | [mtyy.tv](https://mtyy.tv/) https://mtyy2.cc/
-9 | 美剧天堂 | 美剧资源盗播平台 | http://mjtt.io https://www.meijutt.org/
-10 | 星帆影视 | 美剧资源盗播平台 | https://www.xingfan.cc/
-10 |RARBG | 国际影视种子下载站 |[RARBG - Home](https://www.rarbg.bg/) https://rargb.to/ 
+ | 名称 | 类型 | 链接
+| -- | -- | -- | 
+| 茶杯狐（Cupfox） | 影视资源聚合搜索引擎 | https://cupfox.love/
+ | 厂长资源 | 高清影视聚合站 | https://cz01.vip https://www.4kcz.com/ https://czzy.top/
+ | LIBVIO | 免费高清影视聚合站 | https://libvio.lol
+ | 555电影/555影视 | 老牌影视资源聚合站 | https://www.555zxdy.cc/
+ | 低调影视 | 影视内容聚合平台 | https://ddys.app
+ | 奈飞工厂 | 主打Netflix内容盗播 | https://www.netflixgc.com/
+ | 电影天堂 | 老牌影视资源分享站 | https://www.dytt8899.com/ http://www.dy2018.com/
+ | 麦田影院 | 聚合影视网站 | [mtyy.tv](https://mtyy.tv/) https://mtyy2.cc/
+ | 美剧天堂 | 美剧资源盗播平台 | http://mjtt.io https://www.meijutt.org/
+ | 星帆影视 | 美剧资源盗播平台 | https://www.xingfan.cc/
+ |RARBG | 国际影视种子下载站 |[RARBG - Home](https://www.rarbg.bg/) https://rargb.to/ 
+ |钛聚网| 影视聚合平台|https://549.tv/|
 

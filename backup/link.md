@@ -35,3 +35,8 @@
  | 星帆影视 | 美剧资源盗播平台 | https://www.xingfan.cc/
  |RARBG | 国际影视种子下载站 |[RARBG - Home](https://www.rarbg.bg/) https://rargb.to/ 
  |钛聚网| 影视聚合平台|https://549.tv/|
+
+
+|找工作| 
+|  - |
+[就业在线](https://www.jobonline.cn/)     [前程无忧](https://www.51job.com/) |

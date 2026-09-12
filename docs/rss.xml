@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 12 Sep 2026 02:42:33 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>OmniBox</title><link>https://doulifv.github.io/blog/post/OmniBox.html</link><description>### 安装部署
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Forestlake</title><link>https://doulifv.github.io/blog</link><description>👨🏻‍💻一个业余玩家，没事就喜欢玩一些网络技术。</description><copyright>Forestlake</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://i.mji.rip/2025/10/10/233dd815c949e025f1251a319cb22724.jpeg</url><title>avatar</title><link>https://doulifv.github.io/blog</link></image><lastBuildDate>Sat, 12 Sep 2026 02:48:11 +0000</lastBuildDate><managingEditor>Forestlake</managingEditor><ttl>60</ttl><webMaster>Forestlake</webMaster><item><title>OmniBox</title><link>https://doulifv.github.io/blog/post/OmniBox.html</link><description>### 安装部署
 #### 1、创建本地文件夹映射
 ```
  mkdir -p /opt/omnibox/data
@@ -3312,6 +3312,7 @@ Repeat this process for the rest of the CDs in your set.
 | 奇客资讯网 | https://www.solidot.org/ |
 |lowendtalk|https://lowendtalk.com|
 |rjawei|https://www.rjawei.vip/|
+|艾瑞网|https://report.iresearch.cn/|
 ---
 影视资源
  | 名称 | 类型 | 链接
@@ -3328,5 +3329,4 @@ Repeat this process for the rest of the CDs in your set.
  | 星帆影视 | 美剧资源盗播平台 | https://www.xingfan.cc/
  |RARBG | 国际影视种子下载站 |[RARBG - Home](https://www.rarbg.bg/) https://rargb.to/ 
  |钛聚网| 影视聚合平台|https://549.tv/|
-
 。</description><guid isPermaLink="true">https://doulifv.github.io/blog/link.html</guid><pubDate>Sat, 11 Oct 2025 12:15:49 +0000</pubDate></item></channel></rss>

@@ -18,6 +18,7 @@
 | 奇客资讯网 | https://www.solidot.org/ |
 |lowendtalk|https://lowendtalk.com|
 |rjawei|https://www.rjawei.vip/|
+|艾瑞网|https://report.iresearch.cn/|
 ---
 影视资源
  | 名称 | 类型 | 链接
@@ -34,4 +35,3 @@
  | 星帆影视 | 美剧资源盗播平台 | https://www.xingfan.cc/
  |RARBG | 国际影视种子下载站 |[RARBG - Home](https://www.rarbg.bg/) https://rargb.to/ 
  |钛聚网| 影视聚合平台|https://549.tv/|
-

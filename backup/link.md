@@ -12,6 +12,7 @@
 |DownLoadLy.iR|https://DownLoadLy.iR|
 |8度软件|https://baduwangzhan.com/|
 |利爪|https://lizhua.ysepan.com/|
+|rufus |https://rufus.ie/zh/   https://github.com/pbatard/rufus|
 ---
 | NOTE| LINK |
 | ----------- | ----------- |
